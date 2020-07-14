@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="rReceituario" language="groovy" pageWidth="500" pageHeight="550" columnWidth="389" leftMargin="91" rightMargin="20" topMargin="20" bottomMargin="20" uuid="85209b27-1c45-4174-b8ff-ac9fd7a3051e">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="pcnumero" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="datareceita" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[Select r.*, p.pc_nome from receituario r, pacientes p Where r.pc_numero = p.pc_numero AND r.pc_numero = Cast($P{pcnumero} AS Integer) AND r.rc_data = Cast($P{datareceita} AS Date) ORDER BY r.rc_data DESC;]]>
+	</queryString>
+	<field name="pc_numero" class="java.lang.Integer"/>
+	<field name="rc_data" class="java.sql.Date"/>
+	<field name="rc_medico" class="java.lang.String"/>
+	<field name="rc_receita" class="java.lang.String"/>
+	<field name="autoid" class="java.lang.Long"/>
+	<field name="pc_nome" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="151" splitType="Stretch">
+			<textField isStretchWithOverflow="true">
+				<reportElement uuid="e4e2771b-0992-4519-a3a2-ad6ce9a7b87b" x="0" y="134" width="390" height="17"/>
+				<textElement textAlignment="Justified">
+					<font fontName="Monotype Corsiva" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{rc_receita}]]></textFieldExpression>
+			</textField>
+			<componentElement>
+				<reportElement uuid="60f24c50-2337-4e63-a748-eb9fdbf37440" positionType="Float" x="282" y="0" width="108" height="19"/>
+				<jr:barbecue xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" type="Codabar" drawText="true" checksumRequired="false" barWidth="2" barHeight="50">
+					<jr:codeExpression><![CDATA[$F{pc_numero}]]></jr:codeExpression>
+				</jr:barbecue>
+			</componentElement>
+			<textField>
+				<reportElement uuid="e954d6e1-93de-43e7-bac9-283e1e990d6b" x="0" y="109" width="390" height="17"/>
+				<textElement>
+					<font fontName="Monotype Corsiva" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Paciênte: " + $F{pc_nome}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="63">
+			<textField pattern="EEEEE&apos;,&apos; dd &apos;de&apos; MMMMM &apos;de&apos; yyyy&apos;.&apos;">
+				<reportElement uuid="ca764262-2aac-4630-814c-8a3d9e838f76" x="180" y="1" width="210" height="14"/>
+				<textElement>
+					<font fontName="Monotype Corsiva" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{rc_data}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="04c83b69-3d26-482b-b4f3-03f7a3f80be5" x="135" y="48" width="255" height="14"/>
+				<textElement textAlignment="Center">
+					<font fontName="Monotype Corsiva" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Médico]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="c5a705b1-ea8f-4cb0-9ce3-0e8b6d91392c" x="135" y="34" width="255" height="14"/>
+				<textElement textAlignment="Center">
+					<font fontName="Monotype Corsiva" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{rc_medico}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>

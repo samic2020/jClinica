@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="rEntradas" language="groovy" pageWidth="842" pageHeight="595" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="26b57170-775b-4fd4-93ef-88815630369b">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="dtini" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="dtfim" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT
+*
+FROM
+e_farmacia
+WHERE
+e_dtcompra >= Cast($P{dtini} AS Date) AND e_dtcompra <= Cast($P{dtfim} AS Date)
+ORDER BY
+Upper(e_descricao)]]>
+	</queryString>
+	<field name="e_codigo" class="java.lang.String"/>
+	<field name="e_descricao" class="java.lang.String"/>
+	<field name="e_dtcompra" class="java.sql.Date"/>
+	<field name="e_numlote" class="java.lang.String"/>
+	<field name="e_validade" class="java.sql.Date"/>
+	<field name="e_preco" class="java.lang.String"/>
+	<field name="e_unidade" class="java.lang.String"/>
+	<field name="e_quantidade" class="java.lang.Integer"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="35" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="03d653b2-411a-4461-ba44-4e8277578a6c" x="192" y="0" width="494" height="24"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="18" isBold="true"/>
+				</textElement>
+				<text><![CDATA[RELATÓRIO DE ENTRADAS NO ESTOQUE]]></text>
+			</staticText>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="14" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="4718123e-3118-42ea-aad4-6087b0083559" mode="Opaque" x="0" y="0" width="85" height="14" forecolor="#FEFEFE" backcolor="#010101"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Código]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="3e53181f-484a-4634-adbb-3c2c4c6c4e5f" mode="Opaque" x="85" y="0" width="242" height="14" forecolor="#FEFEFE" backcolor="#010101"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Descrição]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="682863a3-5dbe-40bc-9268-36a23ea78d80" mode="Opaque" x="327" y="0" width="75" height="14" forecolor="#FEFEFE" backcolor="#010101"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Dt.Compra]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="add423e0-4558-4629-be7b-c11b2137acbe" mode="Opaque" x="402" y="0" width="118" height="14" forecolor="#FEFEFE" backcolor="#010101"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Numero do Lote]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="a325cf62-2f68-419e-9c0b-26d22d0b0dc9" mode="Opaque" x="520" y="0" width="78" height="14" forecolor="#FEFEFE" backcolor="#010101"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Validade]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="e6ee6026-594f-4a4e-be37-a4080624b6f2" mode="Opaque" x="598" y="0" width="61" height="14" forecolor="#FEFEFE" backcolor="#010101"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Preço]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="f83b24da-ed58-46a0-a97f-12ffd3e0d16c" mode="Opaque" x="659" y="0" width="77" height="14" forecolor="#FEFEFE" backcolor="#010101"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Unidade]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="411688b5-4f16-404f-9250-2046b31fced5" mode="Opaque" x="736" y="0" width="66" height="14" forecolor="#FEFEFE" backcolor="#010101"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Quantidade]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="15" splitType="Stretch">
+			<rectangle>
+				<reportElement uuid="a74c7214-72ca-4743-9ee1-d8d49fd79253" mode="Opaque" x="0" y="0" width="802" height="14" forecolor="#FFFFFF" backcolor="#E4E4EC">
+					<printWhenExpression><![CDATA[new Boolean(($V{COLUMN_COUNT}.intValue() % 2) == 0)]]></printWhenExpression>
+				</reportElement>
+				<graphicElement>
+					<pen lineWidth="0.0"/>
+				</graphicElement>
+			</rectangle>
+			<textField>
+				<reportElement uuid="4688aa0a-7528-452d-b2e2-32ab607a1496" x="0" y="1" width="85" height="14"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{e_codigo}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="2ad83172-9286-4552-88c0-e4f850ab264f" x="85" y="0" width="242" height="15"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{e_descricao}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement uuid="e5d0634f-775d-42e9-a54b-40e18fe41a5f" x="327" y="1" width="75" height="14"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{e_dtcompra}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="ca579377-a981-4c6e-bcc3-36ecedbba9fc" x="402" y="1" width="118" height="14"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{e_numlote}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement uuid="d1def663-0dd4-405a-9bd3-b7b99c6b9fc9" x="526" y="1" width="72" height="14"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{e_validade}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="29d2fd3b-d316-4558-89d1-1dcb287dd561" x="598" y="1" width="61" height="14"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$F{e_preco}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="808855ab-a1cd-49aa-963a-f73ebdf2240a" x="659" y="1" width="77" height="14"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{e_unidade}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="9d38634a-da60-4cd2-b017-9785ecd2efe8" x="736" y="1" width="66" height="14"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{e_quantidade}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="25" splitType="Stretch">
+			<line>
+				<reportElement uuid="e65bd51e-7169-4ecd-8999-2b029fdb8287" x="0" y="0" width="802" height="1"/>
+				<graphicElement>
+					<pen lineWidth="1.5"/>
+				</graphicElement>
+			</line>
+			<textField pattern="EEEEE dd MMMMM yyyy">
+				<reportElement uuid="fbc6fc4b-f7f4-475e-acc4-ece9851087a9" x="0" y="5" width="241" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="2f8e4a4a-8a1c-4103-a4db-09c68bd93c6c" x="686" y="5" width="80" height="20"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA["Página "+$V{PAGE_NUMBER}+" de"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement uuid="c4b4e73f-9c78-490e-a913-f0473eba3159" x="766" y="5" width="40" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>

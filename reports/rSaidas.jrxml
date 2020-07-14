@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="rSaidas" language="groovy" pageWidth="842" pageHeight="595" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="c8612dfe-cc44-485f-88cf-3f668d2fda0f">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="dtini" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="dtfim" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT
+f.s_cpf,(SELECT p.pc_nome FROM pacientes p WHERE CAST(p.pc_numero AS Text) = f.s_cpf OR CAST(p.pc_cpf AS Text) = f.s_cpf) AS s_paciente,f.s_codigo,f.s_descricao,f.s_dtsaida,f.s_unidade, f.s_quantidade
+FROM
+s_farmacia f
+WHERE
+f.s_dtsaida >= Cast($P{dtini} AS Date) AND f.s_dtsaida <= Cast($P{dtfim} AS Date)
+ORDER BY
+f.s_cpf,
+Upper(f.s_descricao),
+f.s_dtsaida]]>
+	</queryString>
+	<field name="s_cpf" class="java.lang.String"/>
+	<field name="s_paciente" class="java.lang.String"/>
+	<field name="s_codigo" class="java.lang.String"/>
+	<field name="s_descricao" class="java.lang.String"/>
+	<field name="s_dtsaida" class="java.sql.Date"/>
+	<field name="s_unidade" class="java.lang.String"/>
+	<field name="s_quantidade" class="java.lang.Integer"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="35" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="f4cbad33-c6f9-4833-aa6a-a5e8319f4674" x="192" y="0" width="494" height="24"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="18" isBold="true"/>
+				</textElement>
+				<text><![CDATA[RELATÓRIO DE SAIDAS NO ESTOQUE]]></text>
+			</staticText>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="14" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="85ad0c4b-9448-4f61-afcf-8017e1e4e1f3" mode="Opaque" x="257" y="0" width="85" height="14" forecolor="#FEFEFE" backcolor="#010101"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Código]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="19e01119-475b-41f2-a29b-f7ca0086e6f7" mode="Opaque" x="342" y="0" width="242" height="14" forecolor="#FEFEFE" backcolor="#010101"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Descrição]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="09b0413c-bfc1-45d2-9d07-f42f947190e4" mode="Opaque" x="584" y="0" width="75" height="14" forecolor="#FEFEFE" backcolor="#010101"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Dt.Saida]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="b20da940-008e-4758-8ff5-e8db5d6deeee" mode="Opaque" x="659" y="0" width="77" height="14" forecolor="#FEFEFE" backcolor="#010101"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Unidade]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="1efc82c0-1dfc-4ada-949f-be1eb669445a" mode="Opaque" x="736" y="0" width="66" height="14" forecolor="#FEFEFE" backcolor="#010101"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Quantidade]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="7b996b50-bcc5-4d63-b9a5-07aafdd94bc3" mode="Opaque" x="0" y="0" width="94" height="14" forecolor="#FEFEFE" backcolor="#010101"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[CPF]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="1077caac-6fa5-4aaa-b827-2d5318f8750e" mode="Opaque" x="94" y="0" width="163" height="14" forecolor="#FEFEFE" backcolor="#010101"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Paciênte]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="15" splitType="Stretch">
+			<rectangle>
+				<reportElement uuid="b825bd8b-b624-4872-868a-68f4d9138fc1" mode="Opaque" x="0" y="0" width="802" height="14" forecolor="#FFFFFF" backcolor="#E4E4EC">
+					<printWhenExpression><![CDATA[new Boolean(($V{COLUMN_COUNT}.intValue() % 2) == 0)]]></printWhenExpression>
+				</reportElement>
+				<graphicElement>
+					<pen lineWidth="0.0"/>
+				</graphicElement>
+			</rectangle>
+			<textField>
+				<reportElement uuid="152640e5-185c-43da-a476-dafc438c78d6" x="257" y="1" width="85" height="14"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{s_codigo}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="6750e8ed-fa4c-4d88-bca4-2217d9bdb503" x="342" y="0" width="242" height="15"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{s_descricao}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement uuid="5925cf57-5672-4af9-b0d8-2dfcca894c90" x="584" y="1" width="75" height="14"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{s_dtsaida}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="95691881-b974-464e-84ce-ebb2120d8b1c" x="0" y="1" width="94" height="14"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{s_cpf}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement uuid="b4ad4025-5082-44f8-b506-7cb7277dce18" x="94" y="0" width="163" height="14"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{s_paciente}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="0888c20e-3cb7-4962-93be-b276ca4b30cb" x="659" y="1" width="77" height="14"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{s_unidade}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="8741c492-7188-4b3d-857a-51cba2b15e32" x="736" y="1" width="66" height="14"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{s_quantidade}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="25" splitType="Stretch">
+			<line>
+				<reportElement uuid="18c128a0-3b94-42a5-8749-6483a3c4d9b0" x="0" y="0" width="802" height="1"/>
+				<graphicElement>
+					<pen lineWidth="1.5"/>
+				</graphicElement>
+			</line>
+			<textField pattern="EEEEE dd MMMMM yyyy">
+				<reportElement uuid="b277e2c9-1c38-4fee-9957-5f7e82db2137" x="0" y="5" width="241" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="68a03bcb-8acf-4856-861b-6a9bcab8fc43" x="686" y="5" width="80" height="20"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA["Página "+$V{PAGE_NUMBER}+" de"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement uuid="661a3840-1716-4544-9355-d87b70a847b8" x="766" y="5" width="40" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>

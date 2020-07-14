@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="rEst1" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="acf0a8e8-093f-40c3-99e7-8205cb22e776">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<queryString>
+		<![CDATA[SELECT f.ma_data, Upper(p.pc_nome) AS paciente, p.pc_nascimento, age(p.pc_nascimento) AS idade, SubString(Upper(p.pc_sexo),1,1) AS sexo, p.pc_renda, p.pc_rendafam, p.pc_pessoas, p.pc_rendaper, Upper(f.ma_indicado) AS indicacao, Upper(f.ma_medico) AS medico, f.ma_codmedico FROM faturar f, pacientes p WHERE (f.ma_pcnumero = p.pc_numero) AND (f.ma_data >= '2013-01-01' AND f.ma_data <= '2013-12-31') AND (SubString(Upper(p.pc_sexo),1,1) = 'F') AND (age(p.pc_nascimento) < (interval '18 year')) AND (p.pc_renda >= 0 AND p.pc_renda <= 5000) ORDER BY f.ma_data, f.ma_codmedico, p.pc_nome;]]>
+	</queryString>
+	<field name="ma_data" class="java.sql.Timestamp"/>
+	<field name="paciente" class="java.lang.String"/>
+	<field name="pc_nascimento" class="java.sql.Timestamp"/>
+	<field name="idade" class="org.postgresql.util.PGInterval"/>
+	<field name="sexo" class="java.lang.String"/>
+	<field name="pc_renda" class="java.lang.Double"/>
+	<field name="pc_rendafam" class="java.lang.Double"/>
+	<field name="pc_pessoas" class="java.lang.Integer"/>
+	<field name="pc_rendaper" class="java.lang.Double"/>
+	<field name="indicacao" class="java.lang.String"/>
+	<field name="medico" class="java.lang.String"/>
+	<field name="ma_codmedico" class="java.lang.Integer"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="63" splitType="Stretch"/>
+	</title>
+	<pageHeader>
+		<band height="35" splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="61" splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="24" splitType="Stretch">
+			<textField pattern="dd/MM/yyyy">
+				<reportElement uuid="64d4a9d6-06f7-4c98-aba9-ce095e080a5b" x="0" y="0" width="76" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{ma_data}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="f6d46604-3ae2-44e6-b13f-3c7760b79491" x="76" y="0" width="100" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{paciente}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement uuid="584f9038-9e77-4603-920f-b98698ab67a4" x="176" y="0" width="67" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{pc_nascimento}]]></textFieldExpression>
+			</textField>
+			<textField pattern="YY">
+				<reportElement uuid="1fc68fb9-4797-4fd7-8310-0d5745af4c7b" x="243" y="0" width="44" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[""+$F{idade}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="fab1ff5c-6d29-4992-9f7d-f5860220da05" x="287" y="0" width="14" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{sexo}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="f659ae1d-9ead-47ea-974d-371ddfcfc0d6" x="301" y="0" width="65" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{pc_renda}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="3e73c9d2-5e9e-4e50-b02b-9d9df39fd990" x="366" y="0" width="63" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{pc_rendafam}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="252bd9da-bf7c-4318-bc81-fe40c07b1055" x="429" y="0" width="22" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{pc_pessoas}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="38ab67f7-0baa-4d2b-868a-09ff41318a36" x="455" y="0" width="52" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{pc_rendaper}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="c1ea8e74-18b9-468c-9de0-415394d6f507" x="507" y="0" width="48" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{indicacao}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="45" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="54" splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="42" splitType="Stretch"/>
+	</summary>
+</jasperReport>

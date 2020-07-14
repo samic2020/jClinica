@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="rSaidas" language="groovy" pageWidth="842" pageHeight="595" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="dtini" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="dtfim" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT
+*
+FROM
+s_farmacia
+WHERE
+s_dtsaida >= Cast($P{dtini} AS Date) AND s_dtsaida <= Cast($P{dtfim} AS Date)
+ORDER BY
+s_cpf,
+s_codigo,
+s_dtsaida]]>
+	</queryString>
+	<field name="s_cpf" class="java.lang.String"/>
+	<field name="s_paciente" class="java.lang.String"/>
+	<field name="s_codigo" class="java.lang.String"/>
+	<field name="s_descricao" class="java.lang.String"/>
+	<field name="s_dtsaida" class="java.sql.Date"/>
+	<field name="s_unidade" class="java.lang.String"/>
+	<field name="s_quantidade" class="java.lang.Integer"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="35" splitType="Stretch">
+			<staticText>
+				<reportElement x="192" y="0" width="494" height="24"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="18" isBold="true"/>
+				</textElement>
+				<text><![CDATA[RELATÓRIO DE SAIDAS NO ESTOQUE]]></text>
+			</staticText>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="14" splitType="Stretch">
+			<staticText>
+				<reportElement mode="Opaque" x="257" y="0" width="85" height="14" forecolor="#FEFEFE" backcolor="#010101"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Código]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="342" y="0" width="242" height="14" forecolor="#FEFEFE" backcolor="#010101"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Descrição]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="584" y="0" width="75" height="14" forecolor="#FEFEFE" backcolor="#010101"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Dt.Saida]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="659" y="0" width="77" height="14" forecolor="#FEFEFE" backcolor="#010101"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Unidade]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="736" y="0" width="66" height="14" forecolor="#FEFEFE" backcolor="#010101"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Quantidade]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="0" width="94" height="14" forecolor="#FEFEFE" backcolor="#010101"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[CPF]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="94" y="0" width="163" height="14" forecolor="#FEFEFE" backcolor="#010101"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Paciênte]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="15" splitType="Stretch">
+			<rectangle>
+				<reportElement mode="Opaque" x="0" y="0" width="802" height="14" forecolor="#FFFFFF" backcolor="#E4E4EC">
+					<printWhenExpression><![CDATA[new Boolean(($V{COLUMN_COUNT}.intValue() % 2) == 0)]]></printWhenExpression>
+				</reportElement>
+				<graphicElement>
+					<pen lineWidth="0.0"/>
+				</graphicElement>
+			</rectangle>
+			<textField>
+				<reportElement x="257" y="1" width="85" height="14"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{s_codigo}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="342" y="0" width="242" height="15"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{s_descricao}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="584" y="1" width="75" height="14"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{s_dtsaida}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="1" width="94" height="14"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{s_cpf}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="94" y="0" width="163" height="14"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{s_paciente}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="659" y="1" width="77" height="14"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{s_unidade}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="736" y="1" width="66" height="14"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{s_quantidade}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="25" splitType="Stretch">
+			<line>
+				<reportElement x="0" y="0" width="802" height="1"/>
+				<graphicElement>
+					<pen lineWidth="1.5"/>
+				</graphicElement>
+			</line>
+			<textField pattern="EEEEE dd MMMMM yyyy">
+				<reportElement x="0" y="5" width="241" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="686" y="5" width="80" height="20"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA["Página "+$V{PAGE_NUMBER}+" de"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="766" y="5" width="40" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>

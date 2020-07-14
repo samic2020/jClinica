@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="rEstoque" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="6558df56-d7b6-4cff-823a-38e2985ca2ab">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<field name="codigo" class="java.lang.String"/>
+	<field name="descricao" class="java.lang.String"/>
+	<field name="unidade" class="java.lang.String"/>
+	<field name="entrada" class="java.lang.Double"/>
+	<field name="saida" class="java.lang.Double"/>
+	<field name="grupoid" class="java.lang.Integer"/>
+	<field name="gruponm" class="java.lang.String"/>
+	<variable name="Saldo" class="java.lang.Double">
+		<variableExpression><![CDATA[$F{entrada} - $F{saida}]]></variableExpression>
+	</variable>
+	<variable name="ssaldo" class="java.lang.Double" resetType="Group" resetGroup="GrupoId" calculation="Sum">
+		<variableExpression><![CDATA[$V{Saldo}]]></variableExpression>
+	</variable>
+	<group name="GrupoId">
+		<groupExpression><![CDATA[$F{grupoid}]]></groupExpression>
+		<groupHeader>
+			<band height="17">
+				<rectangle>
+					<reportElement uuid="5f1ecd72-80bc-443a-8b19-99cfc6acdd2b" x="0" y="5" width="555" height="12"/>
+				</rectangle>
+				<textField>
+					<reportElement uuid="0b842cea-bdfc-4de8-b438-d12e40e372bf" x="55" y="5" width="342" height="12"/>
+					<textElement>
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{gruponm}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement uuid="d2da4231-c3f4-4fd8-aca7-1f6dcf838a01" x="0" y="5" width="32" height="12"/>
+					<textElement>
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Grupo:]]></text>
+				</staticText>
+				<textField>
+					<reportElement uuid="56c9e6ac-1950-4408-bab7-049af9203bf2" x="32" y="5" width="23" height="12"/>
+					<textElement>
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{grupoid}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="12">
+				<elementGroup/>
+				<rectangle>
+					<reportElement uuid="ae20b486-62c7-45c7-80cf-ecba6516b6fc" x="0" y="0" width="555" height="12"/>
+				</rectangle>
+				<textField pattern="####0">
+					<reportElement uuid="45c9b144-c7ad-46b5-bc7c-104b85ff2d6e" x="502" y="0" width="53" height="12"/>
+					<textElement textAlignment="Right">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{ssaldo}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement uuid="1fe78cef-48ae-4d86-ac50-69010310a4f6" x="397" y="0" width="100" height="12"/>
+					<textElement textAlignment="Right">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Total do Grupo =>]]></text>
+				</staticText>
+			</band>
+		</groupFooter>
+	</group>
+	<pageHeader>
+		<band height="35" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="bd01f6fe-93fd-4754-84a4-6c18a3bcb877" x="72" y="0" width="390" height="32"/>
+				<textElement textAlignment="Center">
+					<font size="16" isUnderline="true"/>
+				</textElement>
+				<text><![CDATA[Relatório de Saldos no Estoque]]></text>
+			</staticText>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="20" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="bb2e3313-855f-43f5-9e75-80c00954f89c" x="0" y="2" width="100" height="12"/>
+				<textElement>
+					<font size="8" isUnderline="true"/>
+				</textElement>
+				<text><![CDATA[Medicamento]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="0e2ab738-7159-4ffc-8614-0ed0310ab75c" x="283" y="2" width="63" height="12"/>
+				<textElement>
+					<font size="8" isUnderline="true"/>
+				</textElement>
+				<text><![CDATA[Unidade]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="eb44682c-08e0-4eb8-a5f7-62edb15c2216" x="397" y="2" width="45" height="12"/>
+				<textElement>
+					<font size="8" isUnderline="true"/>
+				</textElement>
+				<text><![CDATA[Entradas]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="56c706eb-9ec0-46b3-8e0f-d4f8009d0b2e" x="448" y="2" width="45" height="12"/>
+				<textElement>
+					<font size="8" isUnderline="true"/>
+				</textElement>
+				<text><![CDATA[Saídas]]></text>
+			</staticText>
+			<line>
+				<reportElement uuid="00a39ba8-b7ed-4fd7-8f89-8e1c28aebe8d" x="0" y="16" width="555" height="1"/>
+			</line>
+			<staticText>
+				<reportElement uuid="ecd29574-2824-43ac-b3bc-4bd2f44d62ce" x="502" y="2" width="45" height="12"/>
+				<textElement>
+					<font size="8" isUnderline="true"/>
+				</textElement>
+				<text><![CDATA[Saldo]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="12" splitType="Stretch">
+			<rectangle>
+				<reportElement uuid="ceab7a6a-89c5-42ec-8884-5754625d5646" mode="Opaque" x="0" y="0" width="555" height="12" forecolor="#000000" backcolor="#CCCCCC">
+					<printWhenExpression><![CDATA[new Boolean(($V{COLUMN_COUNT}.intValue() % 2) == 0)]]></printWhenExpression>
+				</reportElement>
+				<graphicElement>
+					<pen lineWidth="0.0"/>
+				</graphicElement>
+			</rectangle>
+			<textField>
+				<reportElement uuid="e7af4a3b-ffef-405b-b6ba-bed7015e6b05" x="72" y="0" width="238" height="12"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{descricao}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="61777e97-674c-46ad-a446-3372265e60db" x="310" y="0" width="76" height="12"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{unidade}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0">
+				<reportElement uuid="118a47d8-6a45-447d-819c-adc94c27a46e" x="397" y="0" width="45" height="12"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{entrada}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0">
+				<reportElement uuid="9ff4a355-5615-46c4-8f3b-4587475a12fc" x="448" y="0" width="45" height="12"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{saida}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0">
+				<reportElement uuid="7c2523a7-112e-4a27-b35f-adda6a82208e" x="502" y="0" width="45" height="12"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{Saldo}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="d4cb06ec-a6c3-47c8-851a-ed9c3db1df46" x="0" y="0" width="72" height="12"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{codigo}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="28" splitType="Stretch">
+			<line>
+				<reportElement uuid="e3d00572-5e65-4ab6-a3a7-fd2c3b80479a" x="0" y="7" width="555" height="1"/>
+			</line>
+			<textField>
+				<reportElement uuid="27ffbe8a-6c72-4dbd-b66a-2e92e15a1535" x="435" y="8" width="80" height="20"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA["Página "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement uuid="d2c54a4c-6987-4916-894a-59393d1d5f10" x="515" y="8" width="40" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy HH.mm.ss">
+				<reportElement uuid="65e4b202-a036-44fa-99fd-d2c33932ff61" x="0" y="8" width="100" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>

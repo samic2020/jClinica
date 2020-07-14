@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="nCaixas_CH" language="groovy" pageWidth="555" pageHeight="802" columnWidth="555" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="71473827-8b7c-41ed-bb8c-9646134538e3">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="logado" class="java.lang.Integer"/>
+	<parameter name="data" class="java.util.Date"/>
+	<queryString>
+		<![CDATA[SELECT * FROM ncaixa WHERE data = $P{data} and f_cod = $P{logado}]]>
+	</queryString>
+	<field name="autenticacao" class="java.lang.Integer"/>
+	<field name="tipo" class="java.lang.String"/>
+	<field name="toper" class="java.lang.String">
+		<fieldDescription><![CDATA[DN/CH/CT]]></fieldDescription>
+	</field>
+	<field name="oper" class="java.lang.String">
+		<fieldDescription><![CDATA[REC/DES/PCX]]></fieldDescription>
+	</field>
+	<field name="pc_numero" class="java.lang.Integer"/>
+	<field name="data" class="java.sql.Date"/>
+	<field name="datap" class="java.sql.Date"/>
+	<field name="bco" class="java.lang.String"/>
+	<field name="agencia" class="java.lang.String"/>
+	<field name="ncheque" class="java.lang.String"/>
+	<field name="valor" class="java.math.BigDecimal"/>
+	<field name="f_cod" class="java.lang.Integer"/>
+	<field name="nrcartao" class="java.lang.String"/>
+	<variable name="valor_1" class="java.math.BigDecimal" resetType="Column" calculation="Sum">
+		<variableExpression><![CDATA[$F{tipo}.equals( "CRE" ) && $F{oper}.equals( "REC" ) && $F{toper}.equals( "CH" ) ? $F{valor} : 0]]></variableExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="21">
+			<staticText>
+				<reportElement uuid="d9ba0aad-7b4c-43c3-a40e-a239e82afed3" x="0" y="0" width="555" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="14" isBold="true" isUnderline="true"/>
+				</textElement>
+				<text><![CDATA[RELAÇÃO DE CHEQUES A DEPÓSITAR]]></text>
+			</staticText>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="13" splitType="Stretch">
+			<printWhenExpression><![CDATA[$F{tipo}.equals( "CRE" ) && $F{oper}.equals( "REC" ) && $F{toper}.equals( "CH" )]]></printWhenExpression>
+			<textField>
+				<reportElement uuid="fcc635a1-ec3d-4b8c-8fd3-58deec86d355" x="0" y="1" width="37" height="12"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{bco}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="4f6dd727-2fc5-477f-b243-9dde8fec0418" x="37" y="1" width="84" height="12"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{agencia}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="3cf06b87-2b5b-4bab-b49f-15b4ca9029f4" x="121" y="1" width="100" height="12"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ncheque}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement uuid="78c3836b-bacb-47a7-914d-4828ac3e18b4" x="221" y="1" width="100" height="12"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{datap}]]></textFieldExpression>
+			</textField>
+			<textField pattern="¤ #,##0.00">
+				<reportElement uuid="1832800d-2c93-470d-97a1-e1679a647475" x="321" y="1" width="100" height="12"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{valor}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="20">
+			<textField pattern="¤ #,##0.00">
+				<reportElement uuid="94108ab8-e855-40f3-8211-ff25a7d3beb3" x="321" y="0" width="100" height="20"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{valor_1}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="de675100-be2d-46a8-aadd-f65983984fdf" x="167" y="0" width="154" height="20"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[TOTAL =>]]></text>
+			</staticText>
+		</band>
+	</columnFooter>
+	<pageFooter>
+		<band height="22" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="84f029e8-20d8-4317-9e29-50f92e06da91" x="0" y="0" width="100" height="20"/>
+				<textElement>
+					<font isBold="true" isUnderline="true"/>
+				</textElement>
+				<text><![CDATA[Observações:]]></text>
+			</staticText>
+		</band>
+	</pageFooter>
+</jasperReport>

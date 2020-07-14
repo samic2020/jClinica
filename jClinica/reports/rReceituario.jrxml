@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="rReceituario" language="groovy" pageWidth="500" pageHeight="550" columnWidth="390" leftMargin="90" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="pcnumero" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="datareceita" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[Select * from receituario Where pc_numero = Cast($P{pcnumero} AS Integer) AND rc_data = Cast($P{datareceita} AS Date) ORDER BY rc_data DESC;]]>
+	</queryString>
+	<field name="pc_numero" class="java.lang.Integer"/>
+	<field name="rc_data" class="java.sql.Date"/>
+	<field name="rc_medico" class="java.lang.String"/>
+	<field name="rc_receita" class="java.lang.String"/>
+	<field name="autoid" class="java.lang.Long"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="129" splitType="Stretch">
+			<textField isStretchWithOverflow="true">
+				<reportElement x="0" y="111" width="390" height="17"/>
+				<textElement textAlignment="Justified"/>
+				<textFieldExpression><![CDATA[$F{rc_receita}]]></textFieldExpression>
+			</textField>
+			<componentElement>
+				<reportElement positionType="Float" x="282" y="0" width="108" height="19"/>
+				<jr:barbecue xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" type="Codabar" drawText="false" checksumRequired="false" barWidth="2" barHeight="50">
+					<jr:codeExpression><![CDATA["01903033799"]]></jr:codeExpression>
+				</jr:barbecue>
+			</componentElement>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="63">
+			<textField pattern="EEEEE&apos;,&apos; dd &apos;de&apos; MMMMM &apos;de&apos; yyyy&apos;.&apos;">
+				<reportElement x="180" y="1" width="210" height="14"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{rc_data}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="135" y="48" width="255" height="14"/>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Médico]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="135" y="34" width="255" height="14"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{rc_medico}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>

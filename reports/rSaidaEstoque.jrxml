@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="rSaidaEstoque" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="8c0b597f-053e-4356-a066-07d34c5f8051">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="dtini" class="java.lang.String"/>
+	<parameter name="dtfim" class="java.lang.String"/>
+	<field name="codigo" class="java.lang.String"/>
+	<field name="descricao" class="java.lang.String"/>
+	<field name="unidade" class="java.lang.String"/>
+	<field name="entrada" class="java.lang.Double"/>
+	<field name="saida" class="java.lang.Double"/>
+	<field name="grupoid" class="java.lang.Integer"/>
+	<field name="gruponm" class="java.lang.String"/>
+	<variable name="total" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{saida}]]></variableExpression>
+	</variable>
+	<pageHeader>
+		<band height="35" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="10328ac5-9274-4c7a-9105-e50768c21284" x="46" y="0" width="469" height="20"/>
+				<textElement textAlignment="Center">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[RELATÓRIO DE SAÍDA DE MEDICAMENTOS NO ESTOQUE]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="3c455ac8-cd77-4727-b781-af6085a84a6d" x="46" y="20" width="469" height="15"/>
+				<textElement textAlignment="Center">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Período de " + $P{dtini} + " até " + $P{dtfim}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="14" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="a5a108dd-9f64-43cf-a594-6fda07a66739" mode="Opaque" x="0" y="0" width="100" height="14" forecolor="#FFFFFF" backcolor="#000000"/>
+				<textElement>
+					<font size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Código]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="7656c17f-9875-4663-a95d-e3bc989b8010" mode="Opaque" x="100" y="0" width="355" height="14" forecolor="#FFFFFF" backcolor="#000000"/>
+				<textElement>
+					<font size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Descrição]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="1492c717-b748-4c89-9e0b-7c53c802c9d0" mode="Opaque" x="455" y="0" width="100" height="14" forecolor="#FFFFFF" backcolor="#000000"/>
+				<textElement textAlignment="Right">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Saídas]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="14" splitType="Stretch">
+			<rectangle>
+				<reportElement uuid="62961d1f-20f9-4b93-b153-47b545a515b8" mode="Opaque" x="0" y="2" width="555" height="12" forecolor="#000000" backcolor="#CCCCCC">
+					<printWhenExpression><![CDATA[new Boolean(($V{COLUMN_COUNT}.intValue() % 2) == 0)]]></printWhenExpression>
+				</reportElement>
+				<graphicElement>
+					<pen lineWidth="0.0"/>
+				</graphicElement>
+			</rectangle>
+			<textField>
+				<reportElement uuid="1e2224cd-9b77-4f64-a4af-54358beb8885" x="0" y="0" width="100" height="14"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{codigo}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="8e7a80af-3400-45dd-905a-872436fd958a" x="100" y="0" width="355" height="14"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{descricao}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#####00000">
+				<reportElement uuid="82868788-6da6-459f-9057-b694ba234a86" x="455" y="0" width="100" height="14"/>
+				<textElement textAlignment="Right">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{saida}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="27" splitType="Stretch">
+			<line>
+				<reportElement uuid="b7cf4bbf-7264-4a7d-a902-aba9c8e59bc6" x="0" y="5" width="555" height="1"/>
+			</line>
+			<textField pattern="dd/MM/yyyy HH.mm.ss">
+				<reportElement uuid="92529685-d7ae-49d4-823f-1196e4cf306c" x="0" y="6" width="100" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement uuid="52417580-c71a-4110-9e27-14957127fb82" x="515" y="6" width="40" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="f34b4e3a-0b51-45df-b69a-f5d3a54b709e" x="435" y="6" width="80" height="20"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA["Página "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="21">
+			<textField pattern="#####00000">
+				<reportElement uuid="b0f7879e-0efb-4b5c-ad8b-56c720c52bc0" x="455" y="6" width="100" height="14"/>
+				<textElement textAlignment="Right">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{total}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="21864f01-162a-4401-a884-394757da5cdd" x="355" y="6" width="100" height="14"/>
+				<textElement textAlignment="Right">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total de Saidas =>]]></text>
+			</staticText>
+			<line>
+				<reportElement uuid="d830dead-da19-4521-9d2f-cc976a58e692" x="355" y="4" width="200" height="1"/>
+				<graphicElement>
+					<pen lineWidth="1.5" lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+		</band>
+	</summary>
+</jasperReport>

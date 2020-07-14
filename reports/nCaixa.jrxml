@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="nCaixa" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="502483ab-798f-4ba8-a713-fb08b29e7ad0">
+	<queryString language="SQL">
+		<![CDATA[SELECT * FROM ncaixa ORDER BY autenticacao;]]>
+	</queryString>
+	<field name="autenticacao" class="java.lang.Integer"/>
+	<field name="tipo" class="java.lang.String"/>
+	<field name="toper" class="java.lang.String">
+		<fieldDescription><![CDATA[DN/CH/CT]]></fieldDescription>
+	</field>
+	<field name="oper" class="java.lang.String">
+		<fieldDescription><![CDATA[REC/DES/PCX]]></fieldDescription>
+	</field>
+	<field name="pc_numero" class="java.lang.Integer"/>
+	<field name="data" class="java.sql.Date"/>
+	<field name="datap" class="java.sql.Date"/>
+	<field name="bco" class="java.lang.String"/>
+	<field name="agencia" class="java.lang.String"/>
+	<field name="ncheque" class="java.lang.String"/>
+	<field name="valor" class="java.math.BigDecimal"/>
+	<field name="f_cod" class="java.lang.Integer"/>
+	<group name="toper">
+		<groupExpression><![CDATA[$F{toper}]]></groupExpression>
+	</group>
+	<group name="oper">
+		<groupExpression><![CDATA[$F{oper}]]></groupExpression>
+	</group>
+	<group name="tipo">
+		<groupExpression><![CDATA[$F{tipo}]]></groupExpression>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="79" splitType="Stretch"/>
+	</title>
+	<pageHeader>
+		<band height="35" splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="61" splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="125" splitType="Stretch"/>
+	</detail>
+	<columnFooter>
+		<band height="45" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="54" splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="42" splitType="Stretch"/>
+	</summary>
+</jasperReport>

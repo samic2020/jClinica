@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="rEst1_0" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="40f1f8ba-8582-40a6-b3d0-278abbaaeb66">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<queryString>
+		<![CDATA[SELECT f.ma_data, Upper(p.pc_nome) AS paciente, p.pc_nascimento, (select extract(year from age(p.pc_nascimento))) as idade, SubString(Upper(p.pc_sexo),1,1) AS sexo, p.pc_renda, p.pc_rendafam, p.pc_pessoas, p.pc_rendaper, Upper(f.ma_indicado) AS indicacao, Upper(f.ma_medico) AS medico, f.ma_codmedico FROM faturar f, pacientes p WHERE (f.ma_pcnumero = p.pc_numero) AND (f.ma_data >= '2013-01-01' AND f.ma_data <= '2013-12-31') AND (SubString(Upper(p.pc_sexo),1,1) = 'F') AND (age(p.pc_nascimento) < (interval '18 year')) AND (p.pc_renda >= 0 AND p.pc_renda <= 5000) ORDER BY f.ma_data, f.ma_codmedico, p.pc_nome;]]>
+	</queryString>
+	<field name="ma_data" class="java.sql.Timestamp"/>
+	<field name="paciente" class="java.lang.String"/>
+	<field name="pc_nascimento" class="java.sql.Timestamp"/>
+	<field name="idade" class="java.lang.Double"/>
+	<field name="sexo" class="java.lang.String"/>
+	<field name="pc_renda" class="java.lang.Double"/>
+	<field name="pc_rendafam" class="java.lang.Double"/>
+	<field name="pc_pessoas" class="java.lang.Integer"/>
+	<field name="pc_rendaper" class="java.lang.Double"/>
+	<field name="indicacao" class="java.lang.String"/>
+	<field name="medico" class="java.lang.String"/>
+	<field name="ma_codmedico" class="java.lang.Integer"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="63" splitType="Stretch">
+			<image>
+				<reportElement uuid="4ca5482c-675b-416d-a140-f265db214245" x="0" y="0" width="63" height="62"/>
+				<imageExpression><![CDATA["/home/supervisor/NetBeansProjects/jClinica/resources/logo_cs.png"]]></imageExpression>
+			</image>
+			<staticText>
+				<reportElement uuid="423bed37-8f85-4417-8010-a94c6ea4e8df" x="63" y="0" width="739" height="26"/>
+				<textElement>
+					<font size="16" isBold="true"/>
+				</textElement>
+				<text><![CDATA[REAL E BENEMÉRITA SOCIEDADE PORTUGUESA CAIXA DE SOCORROS]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="1061f00f-631f-4c53-bfa1-c7603b9ec64d" x="63" y="26" width="739" height="20"/>
+				<textElement textAlignment="Center">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ESTATISTICAS DO AMBULATÓRIO MÉDICO]]></text>
+			</staticText>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="20" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="76697153-9520-4f6c-ab1f-f066e47c80aa" mode="Opaque" x="0" y="0" width="63" height="20" forecolor="#FFFFFF" backcolor="#000000"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[Data]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="4fd98cf1-68d3-4b49-b8bf-09fd5d3228d1" mode="Opaque" x="63" y="0" width="226" height="20" forecolor="#FFFFFF" backcolor="#000000"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[Paciênte]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="030c3713-3ac5-4c3b-b8e2-21b032f2b52e" mode="Opaque" x="289" y="0" width="70" height="20" forecolor="#FFFFFF" backcolor="#000000"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[Nascimento]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="00d743fc-6262-4c4a-a792-f7a16a028095" mode="Opaque" x="359" y="0" width="28" height="20" forecolor="#FFFFFF" backcolor="#000000"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[Idade]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="d64c7140-7eb9-42d6-8d01-2e43b0dff680" mode="Opaque" x="387" y="0" width="30" height="20" forecolor="#FFFFFF" backcolor="#000000"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Sexo]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="0bf0e26b-b9bd-4592-8ae2-5cecc773c8a5" mode="Opaque" x="417" y="0" width="65" height="20" forecolor="#FFFFFF" backcolor="#000000"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Renda]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="2d928e91-6ba7-4bd4-8a43-2aafbcb141d5" mode="Opaque" x="482" y="0" width="63" height="20" forecolor="#FFFFFF" backcolor="#000000"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[R.Familiar]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="3c1204b9-5a13-4460-a890-31b50325fd14" mode="Opaque" x="545" y="0" width="44" height="20" forecolor="#FFFFFF" backcolor="#000000"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[Pessoas]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="95a0d6bd-1e11-4d30-8b2e-9934e6699dfa" mode="Opaque" x="589" y="0" width="70" height="20" forecolor="#FFFFFF" backcolor="#000000"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[R.PerCap]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="f754c5bd-da43-4b73-a4a1-59bbe7005299" mode="Opaque" x="659" y="0" width="143" height="20" forecolor="#FFFFFF" backcolor="#000000"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[Indicação]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="20" splitType="Stretch">
+			<textField>
+				<reportElement uuid="8ce5f26f-3861-4918-8327-d1a0c66ea5df" x="387" y="0" width="30" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{sexo}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement uuid="7a85087f-2f38-47e5-9a89-39d8469f63eb" x="0" y="0" width="63" height="20"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{ma_data}]]></textFieldExpression>
+			</textField>
+			<textField pattern="¤ #,##0.00" isBlankWhenNull="true">
+				<reportElement uuid="b8900de8-3acf-4502-ba69-c476a8ab2807" x="417" y="0" width="65" height="20"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{pc_renda}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0;-###0">
+				<reportElement uuid="de25038e-7b9d-456b-a990-34915e6eedbf" x="359" y="0" width="28" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{idade}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0;-###0">
+				<reportElement uuid="152a795c-20ca-4db7-899c-0b522adb9772" x="545" y="0" width="44" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{pc_pessoas}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement uuid="15b9febc-fe64-4297-8b6a-d5d1afd679b7" x="289" y="0" width="70" height="20"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{pc_nascimento}]]></textFieldExpression>
+			</textField>
+			<textField pattern="¤ #,##0.00" isBlankWhenNull="true">
+				<reportElement uuid="8eb6dfa5-c1b1-43b0-8c6f-3fd5ab1be363" x="589" y="0" width="70" height="20"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{pc_rendaper}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="de00a4ff-73d1-4394-af0c-df094f31068a" x="659" y="0" width="143" height="20"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{indicacao}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="88f0e00b-75bd-44ea-bd28-f16ddffcc443" x="63" y="0" width="226" height="20"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{paciente}]]></textFieldExpression>
+			</textField>
+			<textField pattern="¤ #,##0.00" isBlankWhenNull="true">
+				<reportElement uuid="76983de9-5972-4ae9-98b6-c8ecacefad66" x="482" y="0" width="63" height="20"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{pc_rendafam}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="28" splitType="Stretch">
+			<line>
+				<reportElement uuid="3804aab6-2d60-44a8-a999-655c21d62d7c" x="1" y="4" width="801" height="1"/>
+			</line>
+			<textField>
+				<reportElement uuid="5c5173d9-c914-4ade-9879-c85459b6dc94" x="1" y="5" width="80" height="20"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA["Página "+$V{PAGE_NUMBER}+" de"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement uuid="afba2a98-f43b-4b7f-8803-b7b9182cb53f" x="81" y="5" width="40" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy h.mm a">
+				<reportElement uuid="89cb896a-4dc1-4b77-86bf-17fc9576cae4" x="624" y="5" width="178" height="20"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>

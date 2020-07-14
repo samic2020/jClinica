@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="fatura" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="DtInicio" class="java.lang.String"/>
+	<parameter name="DtFinal" class="java.lang.String"/>
+	<parameter name="Convenios" class="java.lang.String"/>
+	<parameter name="Medicos" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[]]>
+	</queryString>
+	<field name="f_data" class="java.lang.String">
+		<fieldDescription><![CDATA[f_data]]></fieldDescription>
+	</field>
+	<field name="f_vrexame" class="java.lang.Float">
+		<fieldDescription><![CDATA[f_vrexame]]></fieldDescription>
+	</field>
+	<field name="f_medico" class="java.lang.String">
+		<fieldDescription><![CDATA[f_medico]]></fieldDescription>
+	</field>
+	<field name="f_inscricao" class="java.lang.String">
+		<fieldDescription><![CDATA[f_inscricao]]></fieldDescription>
+	</field>
+	<field name="f_cdconvenio" class="java.lang.String">
+		<fieldDescription><![CDATA[f_cdconvenio]]></fieldDescription>
+	</field>
+	<field name="f_tabela" class="java.lang.String">
+		<fieldDescription><![CDATA[f_tabela]]></fieldDescription>
+	</field>
+	<field name="f_nmexame" class="java.lang.String">
+		<fieldDescription><![CDATA[f_nmexame]]></fieldDescription>
+	</field>
+	<field name="f_especifica" class="java.lang.String">
+		<fieldDescription><![CDATA[f_especifica]]></fieldDescription>
+	</field>
+	<field name="f_cdexame" class="java.lang.String">
+		<fieldDescription><![CDATA[f_cdexame]]></fieldDescription>
+	</field>
+	<field name="f_paciente" class="java.lang.String">
+		<fieldDescription><![CDATA[f_paciente]]></fieldDescription>
+	</field>
+	<field name="f_convenio" class="java.lang.String">
+		<fieldDescription><![CDATA[f_convenio]]></fieldDescription>
+	</field>
+	<field name="f_cdmedico" class="java.lang.String">
+		<fieldDescription><![CDATA[f_cdmedico]]></fieldDescription>
+	</field>
+	<variable name="t_vrexame" class="java.lang.Float" resetType="Group" resetGroup="gcdexame" calculation="Sum">
+		<variableExpression><![CDATA[$F{f_vrexame}]]></variableExpression>
+	</variable>
+	<variable name="t_convenio" class="java.lang.Float" resetType="Group" resetGroup="gmedico" calculation="Sum">
+		<variableExpression><![CDATA[$F{f_vrexame}]]></variableExpression>
+	</variable>
+	<variable name="t_medico" class="java.lang.Float" resetType="Group" resetGroup="gmedico" calculation="Sum">
+		<variableExpression><![CDATA[$F{f_vrexame}]]></variableExpression>
+	</variable>
+	<variable name="t_geral" class="java.lang.Float" calculation="Sum">
+		<variableExpression><![CDATA[$F{f_vrexame}]]></variableExpression>
+	</variable>
+	<group name="gmedico">
+		<groupExpression><![CDATA[$F{f_medico}]]></groupExpression>
+		<groupHeader>
+			<band height="12">
+				<textField>
+					<reportElement x="0" y="0" width="23" height="12"/>
+					<textElement/>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{f_cdmedico}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="23" y="0" width="401" height="12"/>
+					<textElement/>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{f_medico}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="12">
+				<textField pattern="#,##0.00">
+					<reportElement x="503" y="0" width="52" height="12"/>
+					<textElement textAlignment="Right"/>
+					<textFieldExpression class="java.lang.Float"><![CDATA[$V{t_medico}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="342" y="0" width="161" height="12"/>
+					<textElement textAlignment="Right"/>
+					<text><![CDATA[Médico Sub-Total:]]></text>
+				</staticText>
+			</band>
+		</groupFooter>
+	</group>
+	<group name="gconvenio">
+		<groupExpression><![CDATA[$F{f_cdconvenio}]]></groupExpression>
+		<groupHeader>
+			<band height="12">
+				<textField>
+					<reportElement x="23" y="0" width="30" height="12"/>
+					<textElement/>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{f_cdconvenio}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="53" y="0" width="341" height="12"/>
+					<textElement/>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{f_convenio}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="423" y="0" width="100" height="12"/>
+					<textElement textAlignment="Right"/>
+					<text><![CDATA[Tabela:]]></text>
+				</staticText>
+				<textField>
+					<reportElement x="523" y="0" width="32" height="12"/>
+					<textElement/>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{f_tabela}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="12">
+				<textField pattern="#,##0.00">
+					<reportElement x="503" y="0" width="52" height="12"/>
+					<textElement textAlignment="Right"/>
+					<textFieldExpression class="java.lang.Float"><![CDATA[$V{t_convenio}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="342" y="0" width="161" height="12"/>
+					<textElement textAlignment="Right"/>
+					<text><![CDATA[Convênio Sub-Total:]]></text>
+				</staticText>
+			</band>
+		</groupFooter>
+	</group>
+	<group name="gcdexame">
+		<groupExpression><![CDATA[$F{f_cdexame}]]></groupExpression>
+		<groupHeader>
+			<band height="12">
+				<textField>
+					<reportElement x="53" y="0" width="54" height="12"/>
+					<textElement/>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{f_cdexame}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="107" y="0" width="260" height="12"/>
+					<textElement verticalAlignment="Top">
+						<font size="10"/>
+					</textElement>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{f_nmexame}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="373" y="0" width="182" height="12"/>
+					<textElement/>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{f_especifica}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="12">
+				<textField pattern="#,##0.00">
+					<reportElement x="503" y="0" width="52" height="12"/>
+					<textElement textAlignment="Right"/>
+					<textFieldExpression class="java.lang.Float"><![CDATA[$V{t_vrexame}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="342" y="0" width="161" height="12"/>
+					<textElement textAlignment="Right"/>
+					<text><![CDATA[Exames Sub-Total:]]></text>
+				</staticText>
+			</band>
+		</groupFooter>
+	</group>
+	<pageHeader>
+		<band height="51" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="482" height="16"/>
+				<textElement>
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[CENTRAUMA - Centro Gonçalense de Ortopedia e Traumatologia]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="141" y="16" width="226" height="14"/>
+				<textElement textAlignment="Center">
+					<font size="12" isBold="true" isUnderline="true"/>
+				</textElement>
+				<text><![CDATA[Relatório de Faturamento]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="0" y="34" width="237" height="12"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["Período de: " + $P{DtInicio} + " até " + $P{DtFinal}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="265" y="34" width="290" height="12"/>
+				<textElement textAlignment="Right">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["Convênios: " + $P{Convenios} + " - Médico: " + $P{Medicos}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="0" y="49" width="555" height="1"/>
+				<graphicElement>
+					<pen lineWidth="1.5"/>
+				</graphicElement>
+			</line>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="13" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="61" height="12"/>
+				<textElement/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{f_data}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="61" y="0" width="98" height="12"/>
+				<textElement/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{f_inscricao}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="141" y="0" width="159" height="12"/>
+				<textElement/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{f_paciente}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="503" y="0" width="52" height="12"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression class="java.lang.Float"><![CDATA[$F{f_vrexame}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="14" splitType="Stretch">
+			<line>
+				<reportElement x="0" y="1" width="555" height="1"/>
+				<graphicElement>
+					<pen lineWidth="1.25"/>
+				</graphicElement>
+			</line>
+			<textField pattern="EEEEE dd MMMMM yyyy">
+				<reportElement x="0" y="2" width="300" height="12"/>
+				<textElement/>
+				<textFieldExpression class="java.util.Date"><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="435" y="2" width="80" height="12"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression class="java.lang.String"><![CDATA["Página "+$V{PAGE_NUMBER}+" de"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="515" y="2" width="40" height="12"/>
+				<textElement/>
+				<textFieldExpression class="java.lang.String"><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<lastPageFooter>
+		<band height="13">
+			<textField pattern="#,##0.00">
+				<reportElement x="503" y="0" width="52" height="12"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression class="java.lang.Float"><![CDATA[$V{t_geral}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="383" y="0" width="120" height="12"/>
+				<textElement textAlignment="Right"/>
+				<text><![CDATA[Total Geral:]]></text>
+			</staticText>
+		</band>
+	</lastPageFooter>
+</jasperReport>
