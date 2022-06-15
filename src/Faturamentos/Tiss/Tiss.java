@@ -1,5 +1,6 @@
 package Faturamentos.Tiss;
 
+import Atendimentos.jFichaPaciente;
 import Db.DbMain;
 import Funcoes.Dates;
 import Funcoes.FuncoesGlobais;
@@ -11,6 +12,7 @@ import Funcoes.jDirectory;
 import Funcoes.jTableControl;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.nio.ByteBuffer;
@@ -23,6 +25,8 @@ import java.util.List;
 import java.util.regex.PatternSyntaxException;
 import javax.swing.JOptionPane;
 import javax.swing.RowFilter;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
@@ -170,8 +174,32 @@ public class Tiss extends javax.swing.JInternalFrame {
         tabela.Show(jPacientes, data, tam, aln, col, edt);
         sorterPacientes = new TableRowSorter(jPacientes.getModel());
         jPacientes.setRowSorter(sorterPacientes);
+        
+        jPacientes.getModel().addTableModelListener(new CheckBoxModelListener());
     }
 
+    public class CheckBoxModelListener implements TableModelListener {
+
+        public void tableChanged(TableModelEvent e) {
+            int row = e.getFirstRow();
+            int column = e.getColumn();
+            if (column == 5) {
+                TableModel model = (TableModel) e.getSource();
+                String columnName = model.getColumnName(column);
+                Boolean checked = (Boolean) model.getValueAt(row, column);
+                int nSel = 0;
+                try { nSel = Integer.parseInt(tSelect.getText()); } catch (NumberFormatException ex) {}
+                if (checked) {
+                    nSel += 1;
+                } else {
+                    nSel -= 1;
+                }
+                if (nSel < 0) nSel = 0;
+                tSelect.setText(FuncoesGlobais.StrZero(String.valueOf(nSel),4));
+            }                
+        }
+    }    
+    
     private void SelectAll(int zera) {
         for (int i=0; i< jPacientes.getRowCount(); i++) {
             int modelRow = jPacientes.convertRowIndexToModel(i);
@@ -218,6 +246,9 @@ public class Tiss extends javax.swing.JInternalFrame {
         jRbxTiss30200 = new javax.swing.JRadioButton();
         jRbxTiss30500 = new javax.swing.JRadioButton();
         jBtnGerarXml = new javax.swing.JButton();
+        jLabel8 = new javax.swing.JLabel();
+        SelLote = new javax.swing.JSpinner();
+        btnSelLote = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         jRbtConsulta = new javax.swing.JRadioButton();
         jRbtSadt = new javax.swing.JRadioButton();
@@ -226,6 +257,8 @@ public class Tiss extends javax.swing.JInternalFrame {
         jLabel2 = new javax.swing.JLabel();
         jdtfim = new javax.swing.JFormattedTextField();
         jBtnConveniosListar = new javax.swing.JButton();
+        jLabel7 = new javax.swing.JLabel();
+        tSelect = new javax.swing.JLabel();
 
         setBackground(new java.awt.Color(101, 227, 255));
         setClosable(true);
@@ -294,6 +327,11 @@ public class Tiss extends javax.swing.JInternalFrame {
         ));
         jPacientes.setSelectionMode(javax.swing.ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         jPacientes.getTableHeader().setReorderingAllowed(false);
+        jPacientes.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                jPacientesMouseReleased(evt);
+            }
+        });
         jScrollPane2.setViewportView(jPacientes);
 
         jLabel5.setText("Buscar:");
@@ -346,18 +384,35 @@ public class Tiss extends javax.swing.JInternalFrame {
             }
         });
 
+        jLabel8.setText("Selecionar Lote:");
+
+        SelLote.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+
+        btnSelLote.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Figuras/plus.png"))); // NOI18N
+        btnSelLote.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSelLoteActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jChbSelTodosPacientes, javax.swing.GroupLayout.PREFERRED_SIZE, 143, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addComponent(jChbSelTodosPacientes)
+                .addGap(14, 14, 14)
                 .addComponent(jRbxTiss30200)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jRbxTiss30500)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLabel8)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(SelLote)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnSelLote, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(13, 13, 13)
                 .addComponent(jBtnGerarXml)
                 .addContainerGap())
         );
@@ -369,7 +424,10 @@ public class Tiss extends javax.swing.JInternalFrame {
                     .addComponent(jChbSelTodosPacientes)
                     .addComponent(jRbxTiss30200)
                     .addComponent(jRbxTiss30500)
-                    .addComponent(jBtnGerarXml))
+                    .addComponent(jBtnGerarXml)
+                    .addComponent(jLabel8)
+                    .addComponent(SelLote, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnSelLote, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -448,6 +506,12 @@ public class Tiss extends javax.swing.JInternalFrame {
                 .addGap(0, 9, Short.MAX_VALUE))
         );
 
+        jLabel7.setText("Total Selecionado:");
+
+        tSelect.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        tSelect.setText("0000");
+        tSelect.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -467,7 +531,11 @@ public class Tiss extends javax.swing.JInternalFrame {
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(jLabel6)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jTxtPacBuscar))
+                        .addComponent(jTxtPacBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, 309, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel7)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(tSelect, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jScrollPane1)
                     .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.TRAILING))
@@ -494,10 +562,12 @@ public class Tiss extends javax.swing.JInternalFrame {
                 .addGap(2, 2, 2)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel6)
-                    .addComponent(jTxtPacBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jTxtPacBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel7)
+                    .addComponent(tSelect))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(15, Short.MAX_VALUE))
         );
 
         pack();
@@ -506,6 +576,7 @@ public class Tiss extends javax.swing.JInternalFrame {
     private void jBtnListarPacientesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBtnListarPacientesActionPerformed
         ListarPacientes();
         if (jChbSelTodosPacientes.isSelected()) SelectAll(0);
+        tSelect.setText("0000");
     }//GEN-LAST:event_jBtnListarPacientesActionPerformed
 
     private void ListarPacientes() {
@@ -602,6 +673,30 @@ public class Tiss extends javax.swing.JInternalFrame {
             ListarPacientes();
         }
     }//GEN-LAST:event_jBtnGerarXmlActionPerformed
+
+    private void btnSelLoteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSelLoteActionPerformed
+        // Limpa Seleções
+        for (int i=0; i< jPacientes.getRowCount(); i++) {
+            int modelRow = jPacientes.convertRowIndexToModel(i);
+            jPacientes.getModel().setValueAt(false, modelRow, 5);
+        }        
+
+        // Seleciona o Lote
+        for (int i=0; i< jPacientes.getRowCount(); i++) {
+            int modelRow = jPacientes.convertRowIndexToModel(i);
+            if (Integer.parseInt(jPacientes.getModel().getValueAt(modelRow, 9).toString()) == (int)SelLote.getValue()) jPacientes.getModel().setValueAt(true, modelRow, 5);
+        }                
+    }//GEN-LAST:event_btnSelLoteActionPerformed
+
+    private void jPacientesMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jPacientesMouseReleased
+        if (evt.getClickCount() == 2) {
+            int row = jPacientes.convertRowIndexToModel(jPacientes.getSelectedRow());
+            String tficha = jPacientes.getModel().getValueAt(row, 2).toString();
+            jFichaPaciente oFichaPac = new jFichaPaciente(null, true);
+            oFichaPac.ReadFields("WHERE pc_numero = '" + tficha + "';");
+            oFichaPac.setVisible(true);
+        }
+    }//GEN-LAST:event_jPacientesMouseReleased
 
     private String PegaNumerador(int cdconv) {
         String retorno = null;
@@ -714,18 +809,22 @@ public class Tiss extends javax.swing.JInternalFrame {
 
                 // para cada guia
                 for (int i = iPacientes; i <= fPacientes; i++) {
-                    int row = jPacientes.getSelectedRows()[i];
+                    int row = jPacientes.convertRowIndexToModel((int)selPacientes.get(i));
                     if ((Boolean)jPacientes.getModel().getValueAt(row, 5)) {
                         String mdata = Dates.StringtoString(jPacientes.getModel().getValueAt(row, 0).toString(),"dd-MM-yyyy","yyyy-MM-dd");
                         String mhora = jPacientes.getModel().getValueAt(row, 1).toString();
                         String mguia = null; try {mguia = jPacientes.getModel().getValueAt(row, 7).toString();} catch (NullPointerException gex) {mguia = "001";};
                         String mpcnumero = jPacientes.getModel().getValueAt(row, 2).toString();
+                        String mnome = jPacientes.getModel().getValueAt(row, 3).toString();
                         String mcdmed = jPacientes.getModel().getValueAt(row, 6).toString();
                         String mvrcon = jPacientes.getModel().getValueAt(row, 8).toString();
-
+                        
                         Object[][] dadospac = null;
                         try { dadospac = conn.LerCamposTabela(new String[] {"pc_inscricao", "pc_nome"}, "pacientes", "pc_numero = ?", new Object[][]{{"double", Double.valueOf(mpcnumero)}}); } catch (SQLException pex) {}
-                        if (dadospac == null) continue;
+                        if (dadospac == null) {
+                            System.out.println("Lote: " + inumeroLote + " > PCNUMERO = " + mpcnumero + " - " + mnome + " < ignorado.");
+                            continue;
+                        }
 
                         // Atualizar faturar com numero do lote no paciente faturado e true para ma_faturado
                         //AtualizaDadosFaturar(mdata, mhora, mguia, numeroLote);
@@ -733,7 +832,10 @@ public class Tiss extends javax.swing.JInternalFrame {
 
                         Object[][] dadosmed = null;
                         try { dadosmed = conn.LerCamposTabela(new String[] {"md_cpf", "md_nome", "md_crm", "md_crmuf", "md_cbo"}, "medicos", "md_codigo = ?", new Object[][]{{"int", Integer.valueOf(mcdmed)}}); } catch (SQLException pex) {}
-                        if (dadosmed == null) continue;
+                        if (dadosmed == null) {
+                            System.out.println("Lote: " + inumeroLote + " > PCNUMERO = " + mpcnumero + " - " + mnome + " < ignorado.");
+                            continue;
+                        }
 
                         xml += "<ans:guiaConsulta>";
                         xml += "<ans:cabecalhoConsulta>";
@@ -1070,7 +1172,9 @@ public class Tiss extends javax.swing.JInternalFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup ConsultaSadt;
+    private javax.swing.JSpinner SelLote;
     private javax.swing.ButtonGroup Versao;
+    private javax.swing.JButton btnSelLote;
     private javax.swing.JButton jBtnConveniosListar;
     private javax.swing.JButton jBtnGerarXml;
     private javax.swing.JButton jBtnListarPacientes;
@@ -1082,6 +1186,8 @@ public class Tiss extends javax.swing.JInternalFrame {
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
     private javax.swing.JTable jPacientes;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
@@ -1095,5 +1201,6 @@ public class Tiss extends javax.swing.JInternalFrame {
     private javax.swing.JTextField jTxtPacBuscar;
     private javax.swing.JFormattedTextField jdtfim;
     private javax.swing.JFormattedTextField jdtinic;
+    private javax.swing.JLabel tSelect;
     // End of variables declaration//GEN-END:variables
 }
