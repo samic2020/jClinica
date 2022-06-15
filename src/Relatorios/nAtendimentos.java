@@ -6,10 +6,8 @@
 package Relatorios;
 
 import Db.DbMain;
-import Funcoes.Dates;
 import Funcoes.TableControl;
 import Funcoes.VariaveisGlobais;
-import Funcoes.toPreview;
 import java.awt.BorderLayout;
 import java.awt.Point;
 import java.awt.event.KeyAdapter;
@@ -28,11 +26,8 @@ import javax.swing.RowFilter;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JRExporter;
-import net.sf.jasperreports.engine.JRExporterParameter;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.export.JRPdfExporter;
 import net.sf.jasperreports.view.JRViewer;
 
 /**
@@ -43,6 +38,7 @@ public class nAtendimentos extends javax.swing.JInternalFrame {
     DbMain conn = VariaveisGlobais.con;
     TableRowSorter<TableModel> sorter;
     int cdmed = -1;
+    boolean bExecNome = false, bExecCodigo = false;
     
     /**
      * Creates new form nAtendimentos
@@ -103,6 +99,8 @@ public class nAtendimentos extends javax.swing.JInternalFrame {
             public void keyPressed(KeyEvent e) {
             }
         });
+
+        FillLab();
         jBuscar.requestFocus();        
     }
 
@@ -115,6 +113,7 @@ public class nAtendimentos extends javax.swing.JInternalFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        GrupoRel = new javax.swing.ButtonGroup();
         jLabel1 = new javax.swing.JLabel();
         jdtinic = new javax.swing.JFormattedTextField();
         jLabel2 = new javax.swing.JLabel();
@@ -125,10 +124,18 @@ public class nAtendimentos extends javax.swing.JInternalFrame {
         jLabel4 = new javax.swing.JLabel();
         jbtPrint = new javax.swing.JButton();
         jBuscar = new javax.swing.JTextField();
+        jParticular = new javax.swing.JRadioButton();
+        jAtendimentos = new javax.swing.JRadioButton();
+        jProcedimentos = new javax.swing.JRadioButton();
+        jLaboratorio = new javax.swing.JRadioButton();
+        labCodigo = new javax.swing.JComboBox<>();
+        labNome = new javax.swing.JComboBox<>();
 
+        setBackground(new java.awt.Color(101, 227, 255));
         setClosable(true);
         setIconifiable(true);
         setTitle(".:: Relatório de Atendimentos");
+        setOpaque(true);
         setVisible(true);
 
         jLabel1.setText("Período:");
@@ -190,6 +197,42 @@ public class nAtendimentos extends javax.swing.JInternalFrame {
             }
         });
 
+        jParticular.setBackground(new java.awt.Color(101, 227, 255));
+        GrupoRel.add(jParticular);
+        jParticular.setSelected(true);
+        jParticular.setText("Particulares");
+
+        jAtendimentos.setBackground(new java.awt.Color(101, 227, 255));
+        GrupoRel.add(jAtendimentos);
+        jAtendimentos.setText("Atendimentos");
+
+        jProcedimentos.setBackground(new java.awt.Color(101, 227, 255));
+        GrupoRel.add(jProcedimentos);
+        jProcedimentos.setText("Procedimentos");
+
+        jLaboratorio.setBackground(new java.awt.Color(101, 227, 255));
+        GrupoRel.add(jLaboratorio);
+        jLaboratorio.setText("Laboratório");
+        jLaboratorio.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                jLaboratorioStateChanged(evt);
+            }
+        });
+
+        labCodigo.setEnabled(false);
+        labCodigo.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                labCodigoItemStateChanged(evt);
+            }
+        });
+
+        labNome.setEnabled(false);
+        labNome.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                labNomeItemStateChanged(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -199,21 +242,33 @@ public class nAtendimentos extends javax.swing.JInternalFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 629, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addGroup(layout.createSequentialGroup()
+                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                            .addComponent(jLaboratorio)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(labCodigo, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(labNome, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(jbtPrint))
+                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                             .addComponent(jLabel4)
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(jBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, 156, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jBuscar))
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 623, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(layout.createSequentialGroup()
+                            .addComponent(jParticular)
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(jAtendimentos)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                            .addComponent(jProcedimentos)
+                            .addGap(109, 109, 109)
                             .addComponent(jLabel1)
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(jdtinic, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jdtinic, javax.swing.GroupLayout.PREFERRED_SIZE, 88, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                             .addComponent(jLabel2)
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(jdtfim, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(jbtPrint, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 623, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(jdtfim, javax.swing.GroupLayout.PREFERRED_SIZE, 89, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -221,19 +276,29 @@ public class nAtendimentos extends javax.swing.JInternalFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jLabel3)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 281, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 281, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(2, 2, 2)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel4)
+                    .addComponent(jBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jParticular)
+                    .addComponent(jAtendimentos)
+                    .addComponent(jProcedimentos)
+                    .addComponent(jLabel1)
+                    .addComponent(jdtinic, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel2)
+                    .addComponent(jdtfim, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel4)
-                        .addComponent(jBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel1)
-                        .addComponent(jdtinic, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel2)
-                        .addComponent(jdtfim, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jbtPrint, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
-                .addContainerGap())
+                        .addComponent(labCodigo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(labNome, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jbtPrint, javax.swing.GroupLayout.PREFERRED_SIZE, 27, Short.MAX_VALUE))
+                    .addComponent(jLaboratorio))
+                .addGap(0, 11, Short.MAX_VALUE))
         );
 
         pack();
@@ -246,32 +311,75 @@ public class nAtendimentos extends javax.swing.JInternalFrame {
         parametros.put("datainic", (Date)jdtinic.getValue());
         parametros.put("datafim", (Date)jdtfim.getValue());
         parametros.put("logado", VariaveisGlobais.logado);
-        parametros.put("cdmed", cdmed);
-
-        try {
-            String fileName = "reports/nRelAtendimentos.jasper";
-            JasperPrint print = JasperFillManager.fillReport(fileName, parametros, conn.conn);
-            viewReportFrame("Relatorio de Atendimentos", print);
-//            // Create a PDF exporter
-//            JRExporter exporter = new JRPdfExporter();
-//
-//            // Configure the exporter (set output file name and print object)
-//            String outFileName = "reports/Fatura/nRelAtendimentos_" + VariaveisGlobais.logado.trim().toUpperCase() + "_" + Dates.DateFormat("ddMMyyyyHHmmss",new Date()) + ".pdf";
-//            exporter.setParameter(JRExporterParameter.OUTPUT_FILE_NAME, outFileName);
-//            exporter.setParameter(JRExporterParameter.JASPER_PRINT, print);
-//
-//            // Export the PDF file
-//            exporter.exportReport();
-//            
-//            new toPreview(outFileName);
-        } catch (JRException e) {
-            e.printStackTrace();
-            System.exit(1);
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.exit(1);
-        }        
+        if (jLaboratorio.isSelected()) {
+            parametros.put("cdmed", Integer.valueOf(labCodigo.getSelectedItem().toString()));
+        } else {
+            parametros.put("cdmed", cdmed);
+        }
+        
+        String repoName;
+        if (jParticular.isSelected()) {
+            parametros.put("SUBREPORT_DIR", "reports/");
+            repoName = "nRelAtendimentos";
+            try {
+                String fileName = "reports/" + repoName + ".jasper";
+                JasperPrint print = JasperFillManager.fillReport(fileName, parametros, conn.conn);
+                viewReportFrame("Relatorio de Atendimentos", print);
+            } catch (JRException e) {
+                e.printStackTrace();
+                System.exit(1);
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.exit(1);
+            }        
+        } else if (jAtendimentos.isSelected()) {
+            repoName = "rAtendimentos";
+            try {
+                String fileName = "reports/" + repoName + ".jasper";
+                JasperPrint print = JasperFillManager.fillReport(fileName, parametros, conn.conn);
+                viewReportFrame("Relatorio de Atendimentos", print);
+            } catch (JRException e) {
+                e.printStackTrace();
+                System.exit(1);
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.exit(1);
+            }        
+        } else {
+            // Procedimentos
+            repoName = "rProcedimentos";
+            try {
+                String fileName = "reports/" + repoName + ".jasper";
+                JasperPrint print = JasperFillManager.fillReport(fileName, parametros, conn.conn);
+                viewReportFrame("Relatorio de Atendimentos", print);
+            } catch (JRException e) {
+                e.printStackTrace();
+                System.exit(1);
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.exit(1);
+            }        
+        }
     }//GEN-LAST:event_jbtPrintActionPerformed
+
+    private void labCodigoItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_labCodigoItemStateChanged
+        if (!bExecNome) {
+            int pos = labCodigo.getSelectedIndex();
+            if (labNome.getItemCount() > 0) {bExecCodigo = true; labNome.setSelectedIndex(pos); bExecCodigo = false;}
+        }
+    }//GEN-LAST:event_labCodigoItemStateChanged
+
+    private void labNomeItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_labNomeItemStateChanged
+        if (!bExecCodigo) {
+            int pos = labNome.getSelectedIndex();
+            if (labCodigo.getItemCount() > 0) {bExecNome = true; labCodigo.setSelectedIndex(pos); bExecNome = false;}
+        }
+    }//GEN-LAST:event_labNomeItemStateChanged
+
+    private void jLaboratorioStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_jLaboratorioStateChanged
+        labCodigo.setEnabled(jLaboratorio.isSelected());
+        labNome.setEnabled(jLaboratorio.isSelected());
+    }//GEN-LAST:event_jLaboratorioStateChanged
 
     private static void viewReportFrame( String titulo, JasperPrint print ) {
 
@@ -300,17 +408,40 @@ public class nAtendimentos extends javax.swing.JInternalFrame {
         frameRelatorio.setVisible( true );
 
     }
+    
+    private void FillLab() {
+        String tsql = "select id codigo, nome from laboratorios ORDER BY UPPER(nome);";
+        ResultSet tbmedicos = conn.AbrirTabela(tsql, ResultSet.CONCUR_READ_ONLY);
+            
+        labCodigo.removeAllItems();
+        labNome.removeAllItems();
+        try {
+          while (tbmedicos.next()) {
+            labCodigo.addItem(tbmedicos.getString("codigo"));
+            labNome.addItem(tbmedicos.getString("nome"));
+          }
+        }
+        catch (Exception err) {}
+        DbMain.FecharTabela(tbmedicos);                    
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.ButtonGroup GrupoRel;
+    private javax.swing.JRadioButton jAtendimentos;
     private javax.swing.JTextField jBuscar;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JRadioButton jLaboratorio;
     private javax.swing.JTable jMedicos;
+    private javax.swing.JRadioButton jParticular;
+    private javax.swing.JRadioButton jProcedimentos;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JButton jbtPrint;
     private javax.swing.JFormattedTextField jdtfim;
     private javax.swing.JFormattedTextField jdtinic;
+    private javax.swing.JComboBox<String> labCodigo;
+    private javax.swing.JComboBox<String> labNome;
     // End of variables declaration//GEN-END:variables
 }

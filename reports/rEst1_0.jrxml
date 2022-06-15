@@ -4,7 +4,7 @@
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
 	<queryString>
-		<![CDATA[SELECT f.ma_data, Upper(p.pc_nome) AS paciente, p.pc_nascimento, (select extract(year from age(p.pc_nascimento))) as idade, SubString(Upper(p.pc_sexo),1,1) AS sexo, p.pc_renda, p.pc_rendafam, p.pc_pessoas, p.pc_rendaper, Upper(f.ma_indicado) AS indicacao, Upper(f.ma_medico) AS medico, f.ma_codmedico FROM faturar f, pacientes p WHERE (f.ma_pcnumero = p.pc_numero) AND (f.ma_data >= '2013-01-01' AND f.ma_data <= '2013-12-31') AND (SubString(Upper(p.pc_sexo),1,1) = 'F') AND (age(p.pc_nascimento) < (interval '18 year')) AND (p.pc_renda >= 0 AND p.pc_renda <= 5000) ORDER BY f.ma_data, f.ma_codmedico, p.pc_nome;]]>
+		<![CDATA[SELECT f.ma_data, Upper(p.pc_nome) AS paciente, p.pc_nascimento, (select extract(year from age(p.pc_nascimento))) as idade, SubString(Upper(p.pc_sexo),1,1) AS sexo, p.pc_renda, p.pc_rendafam, p.pc_pessoas, p.pc_rendaper, Upper(f.ma_indicado) AS indicacao, Upper(f.ma_medico) AS medico, f.ma_codmedico FROM faturar f, pacientes p WHERE (f.ma_pcnumero = p.pc_numero) AND (f.ma_data >= '2020-01-01' AND f.ma_data <= '2020-12-31') ORDER BY f.ma_data, f.ma_codmedico, p.pc_nome;]]>
 	</queryString>
 	<field name="ma_data" class="java.sql.Timestamp"/>
 	<field name="paciente" class="java.lang.String"/>

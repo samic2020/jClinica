@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="rReceituario" language="groovy" pageWidth="500" pageHeight="550" columnWidth="389" leftMargin="91" rightMargin="20" topMargin="20" bottomMargin="20" uuid="85209b27-1c45-4174-b8ff-ac9fd7a3051e">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="rReceituario" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="85209b27-1c45-4174-b8ff-ac9fd7a3051e">
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
@@ -43,6 +43,77 @@
 				</textElement>
 				<textFieldExpression><![CDATA["Paciênte: " + $F{pc_nome}]]></textFieldExpression>
 			</textField>
+			<staticText>
+				<reportElement uuid="daffea04-a000-4dd3-a052-29aeeef55bd4" x="96" y="62" width="293" height="20"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[MEMBRO DA ASSOCIAÇÃO LUIS DE CAMÕES]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="e9902f62-31a2-4bd6-a541-46a6bb37e271" x="96" y="48" width="293" height="10"/>
+				<textElement>
+					<font size="6"/>
+				</textElement>
+				<text><![CDATA[FUNDADO EM 1863]]></text>
+			</staticText>
+			<image>
+				<reportElement uuid="ab881937-de25-4cde-819e-5094641123a9" x="0" y="0" width="96" height="82"/>
+				<imageExpression><![CDATA["resources\\logo_cs.png"]]></imageExpression>
+			</image>
+			<staticText>
+				<reportElement uuid="8138a8d9-400d-4cbb-91ed-9ceb20b2de2e" x="96" y="21" width="293" height="27"/>
+				<textElement>
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[Real e Benemérita Sociedade Portuguesa Caixa de
+Socorros D. Pedro V]]></text>
+			</staticText>
+			<componentElement>
+				<reportElement uuid="3151f12c-3b5d-444d-a498-058c6b80c4b7" positionType="Float" x="694" y="0" width="108" height="19"/>
+				<jr:barbecue xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" type="Codabar" drawText="true" checksumRequired="false" barWidth="2" barHeight="50">
+					<jr:codeExpression><![CDATA[$F{pc_numero}]]></jr:codeExpression>
+				</jr:barbecue>
+			</componentElement>
+			<staticText>
+				<reportElement uuid="e5335ec5-0be8-441f-ad71-2c3867bc99fb" x="508" y="21" width="293" height="27"/>
+				<textElement>
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[Real e Benemérita Sociedade Portuguesa Caixa de
+Socorros D. Pedro V]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="653860db-a943-4066-8d28-0906d5632007" x="508" y="48" width="293" height="10"/>
+				<textElement>
+					<font size="6"/>
+				</textElement>
+				<text><![CDATA[FUNDADO EM 1863]]></text>
+			</staticText>
+			<image>
+				<reportElement uuid="0b23297e-4aa1-4bda-ad87-5664230f1785" x="412" y="0" width="96" height="82"/>
+			</image>
+			<staticText>
+				<reportElement uuid="de7aa97c-103c-487d-a3fb-fd41239e24ff" x="508" y="62" width="293" height="20"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[MEMBRO DA ASSOCIAÇÃO LUIS DE CAMÕES]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement uuid="fa8165f5-4691-49d2-bfd3-1fce74cebe5f" x="412" y="134" width="390" height="17"/>
+				<textElement textAlignment="Justified">
+					<font fontName="Monotype Corsiva" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{rc_receita}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="8794c87e-4b4f-46c9-9de4-7ebb70c96b8d" x="412" y="109" width="390" height="17"/>
+				<textElement>
+					<font fontName="Monotype Corsiva" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Paciênte: " + $F{pc_nome}]]></textFieldExpression>
+			</textField>
 		</band>
 	</detail>
 	<pageFooter>
@@ -63,6 +134,27 @@
 			</staticText>
 			<textField>
 				<reportElement uuid="c5a705b1-ea8f-4cb0-9ce3-0e8b6d91392c" x="135" y="34" width="255" height="14"/>
+				<textElement textAlignment="Center">
+					<font fontName="Monotype Corsiva" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{rc_medico}]]></textFieldExpression>
+			</textField>
+			<textField pattern="EEEEE&apos;,&apos; dd &apos;de&apos; MMMMM &apos;de&apos; yyyy&apos;.&apos;">
+				<reportElement uuid="8c7c9a75-05a5-4758-bc71-384c87ece219" x="591" y="1" width="210" height="14"/>
+				<textElement>
+					<font fontName="Monotype Corsiva" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{rc_data}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="94e6293b-2072-472c-93d7-d3c097861f8e" x="546" y="48" width="255" height="14"/>
+				<textElement textAlignment="Center">
+					<font fontName="Monotype Corsiva" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Médico]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="3522bb63-c530-4cea-9ba1-8fd489f8011c" x="546" y="34" width="255" height="14"/>
 				<textElement textAlignment="Center">
 					<font fontName="Monotype Corsiva" size="12"/>
 				</textElement>

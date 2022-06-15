@@ -5,7 +5,7 @@
 
 package Funcoes;
 
-import java.util.*;
+import java.util.ArrayList;
 import javax.swing.JComboBox;
 
 /**
@@ -97,9 +97,25 @@ public class FuncoesGlobais {
         if (marray.length == 0) {return retorno;}
         boolean achei = false;
         for (i=0;i<marray.length;i++) {
-            if (marray[i][coluna].contains(oque)) {
+            if (marray[i][coluna].equalsIgnoreCase(oque)) {
                 achei = true;
                 break;
+            }
+        }
+        if (achei) retorno = i;
+        return retorno;
+    }
+
+    public static int FindinArrays(String[][] marray, int coluna[], String oque[]) {
+        int retorno = -1, i = 0;
+        if (marray.length == 0) {return retorno;}
+        boolean achei = false;
+        for (i=0;i<marray.length;i++) {
+            if (marray[i][coluna[0]].equalsIgnoreCase(oque[0])) {
+                if (marray[i][coluna[1]].equalsIgnoreCase(oque[1])) {
+                    achei = true;
+                    break;
+                }
             }
         }
         if (achei) retorno = i;
@@ -143,11 +159,11 @@ public class FuncoesGlobais {
         return temp;
     }
 
-    public static String[] ArrayDel(String[] array, int index) {
-            ArrayList list = CreateStringList(array);
-            list.remove(index);
-            return ConvertToStringArray(list);
-    }
+//    public static String[] ArrayDel(String[] array, int index) {
+//            ArrayList list = CreateStringList(array);
+//            list.remove(index);
+//            return ConvertToStringArray(list);
+//    }
 
     public static String[][] ArraysAdd(String[][] mArray, String[] value) {
         String[][] temp = new String[mArray.length + 1][value.length];
@@ -172,20 +188,20 @@ public class FuncoesGlobais {
         return temp;
     }
 
-    public static String[][] ArraysDelSub(String[][] array, int index, int pos) {
-        if (array.length == 0) return null;
-
-        String[][] temp = {};
-        for (int i=0; i <= array.length - 1; i++) {
-            if (i != index) {
-                temp = ArraysAdd(temp, array[i]);
-            } else {
-                temp = ArraysAdd(temp, ArrayDel(array[i], pos));
-            }
-        }
-
-        return temp;
-    }
+//    public static String[][] ArraysDelSub(String[][] array, int index, int pos) {
+//        if (array.length == 0) return null;
+//
+//        String[][] temp = {};
+//        for (int i=0; i <= array.length - 1; i++) {
+//            if (i != index) {
+//                temp = ArraysAdd(temp, array[i]);
+//            } else {
+//                temp = ArraysAdd(temp, ArrayDel(array[i], pos));
+//            }
+//        }
+//
+//        return temp;
+//    }
 
     public static Object[][] ObjectsAdd(Object[][] mArray, Object[] value) {
         Object[][] temp = new Object[mArray.length + 1][value.length];
@@ -222,12 +238,11 @@ public class FuncoesGlobais {
         return temp;
     }
 
-    public static ArrayList<String> CreateStringList(String ... values)
-    {
-        ArrayList<String> results = new ArrayList<String>();
-        Collections.addAll(results, values);
-        return results;
-    }
+//    public static ArrayList<String> CreateStringList(String ... values) {
+//        ArrayList<String> results = new ArrayList<String>();
+//        Collections.addAll(results, values);
+//        return results;
+//    }
 
     public static String[] ConvertToStringArray(ArrayList list)
     {

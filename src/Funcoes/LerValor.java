@@ -158,4 +158,8 @@ public class LerValor {
         return fvr;
     }
 
+    public static String Currency2String(String value) {
+        return value.replace(".", "").replace(",", ".");
+    }
 }
+ 

@@ -82,7 +82,7 @@ public class jLogin extends javax.swing.JDialog {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jDesktopPane1 = new BackGroundDeskTopPane("/Figuras/login_cs.jpg");
+        jDesktopPane1 = new BackGroundDeskTopPane("/Figuras/login_cm.jpg");
         jUnidade = new javax.swing.JComboBox();
         jUsuario = new javax.swing.JTextField();
         jSenha = new javax.swing.JPasswordField();
@@ -137,7 +137,7 @@ public class jLogin extends javax.swing.JDialog {
         jLabel1.setText("ATENÇÃO COM A DATA/HORA!!!");
         jLabel1.setOpaque(true);
         jDesktopPane1.add(jLabel1);
-        jLabel1.setBounds(70, 106, 310, 30);
+        jLabel1.setBounds(180, 240, 220, 20);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);

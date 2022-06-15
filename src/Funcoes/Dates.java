@@ -4,7 +4,12 @@
  */
 
 package Funcoes;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -157,8 +162,30 @@ public class Dates {
     }
 
     public static java.sql.Date toSqlDate(Date data) {
-        java.util.Date date = new java.util.Date(data.getYear(), data.getMonth(), data.getDate());
+        java.util.Date date;
+        try { 
+            date = new java.util.Date(data.getYear(), data.getMonth(), data.getDate(), data.getHours(), data.getMinutes(), data.getSeconds());
+        } catch (Exception e) {
+            date = new java.util.Date(data.getYear(), data.getMonth(), data.getDate(), 0, 0, 0);
+        }
         java.sql.Date sqlDate = new java.sql.Date(date.getTime()); 
         return sqlDate;
+    }
+
+    public static java.sql.Timestamp toSqlTime(Date data) {
+        java.util.Date date = new java.util.Date(data.getYear(), data.getMonth(), data.getDate(), data.getHours(), data.getMinutes(), data.getSeconds());
+        java.sql.Timestamp sqlDate = new java.sql.Timestamp(date.getTime()); 
+        return sqlDate;
+    }
+    
+    public static boolean isDateValid(String date, String pattern) {
+        try {
+            DateFormat df = new SimpleDateFormat(pattern);
+            df.setLenient(false);
+            df.parse(date);
+            return true;
+        } catch (ParseException e) {
+            return false;
+        }
     }
 }

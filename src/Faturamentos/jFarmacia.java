@@ -190,16 +190,21 @@ public class jFarmacia extends javax.swing.JInternalFrame {
         ebtExcluir = new javax.swing.JButton();
         ebtFinalizar = new javax.swing.JButton();
 
+        setBackground(new java.awt.Color(101, 227, 255));
         setClosable(true);
         setIconifiable(true);
         setTitle(".:: Controle de Entrada e Saida de Medicamentos...");
+        setOpaque(true);
         setVisible(true);
 
+        jAbas.setBackground(new java.awt.Color(101, 227, 255));
         jAbas.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseReleased(java.awt.event.MouseEvent evt) {
                 jAbasMouseReleased(evt);
             }
         });
+
+        jPanel2.setBackground(new java.awt.Color(101, 227, 255));
 
         sCodigo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -396,6 +401,8 @@ public class jFarmacia extends javax.swing.JInternalFrame {
 
         jAbas.addTab("Saída", jPanel2);
 
+        jPanel3.setBackground(new java.awt.Color(101, 227, 255));
+
         jLabel16.setFont(new java.awt.Font("Ubuntu", 1, 15)); // NOI18N
         jLabel16.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel16.setText("MEDICAMENTOS NO ESTOQUE");
@@ -551,6 +558,8 @@ public class jFarmacia extends javax.swing.JInternalFrame {
         );
 
         jAbas.addTab("Controle", jPanel3);
+
+        jPanel1.setBackground(new java.awt.Color(101, 227, 255));
 
         jLabel1.setFont(new java.awt.Font("Ubuntu", 1, 10)); // NOI18N
         jLabel1.setText("Código");

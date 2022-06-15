@@ -5,17 +5,40 @@
  */
 package Atendimentos;
 
-import static Atendimentos.jRecepcao.os;
 import Caixa.jPagRec;
 import Db.DbMain;
+import Funcoes.Collections;
 import Funcoes.Dates;
 import Funcoes.FuncoesGlobais;
+import Funcoes.LerValor;
+import Funcoes.Pad;
+import Funcoes.ResizeImageIcon;
 import Funcoes.Settings;
+import Funcoes.StringManager;
 import Funcoes.TableControl;
 import Funcoes.VariaveisGlobais;
+import Funcoes.jPDF;
 import Funcoes.newTable;
+import Funcoes.toPrint;
+import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.Chunk;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.Rectangle;
+import com.itextpdf.text.pdf.BarcodeInter25;
+import com.itextpdf.text.pdf.BaseFont;
+import com.itextpdf.text.pdf.PdfContentByte;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.draw.LineSeparator;
+import com.lowagie.text.Element;
 import java.awt.AWTKeyStroke;
+import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.Font;
+import java.awt.Image;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -37,7 +60,16 @@ import javax.swing.table.TableRowSorter;
 import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 import static java.lang.Thread.sleep;
 import java.math.BigDecimal;
+import java.sql.SQLException;
+import java.text.NumberFormat;
+import java.util.Locale;
+import javax.swing.GroupLayout;
+import javax.swing.JLabel;
 import static javax.swing.JOptionPane.INFORMATION_MESSAGE;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.LayoutStyle;
 import javax.swing.SwingWorker;
 
 /**
@@ -53,11 +85,14 @@ public class jRecepcao extends javax.swing.JInternalFrame {
     TableRowSorter<TableModel> sorter;
     TableRowSorter<TableModel> sorter2;
     TableRowSorter<TableModel> sorter3;
+    TableRowSorter<TableModel> sorter4;
     DbMain conn = VariaveisGlobais.con;
     Thread digitacao;
     int tam = 0;
     int n = 0;
     
+    private static SwingWorker w = null;
+            
     public jRecepcao() {
         initComponents();
 
@@ -70,13 +105,14 @@ public class jRecepcao extends javax.swing.JInternalFrame {
             }
         } catch (Exception e) {}            
         
-        setSize(756, 655);
+        setSize(756, 610);
 
-//        new Thread() {
-//            public void run() {
-//                new MultiThreadChatClient().main(new String[] { VariaveisGlobais.logado, "rec", VariaveisGlobais.unidade, "" });
-//            }
-//        }.start();
+        new Thread() {
+            public void run() {
+                new MultiThreadChatClient().main(new String[] { VariaveisGlobais.logado, "rec", VariaveisGlobais.unidade, "" });
+            }
+        }.start();
+        
         HashSet conj = new HashSet(getFocusTraversalKeys(0));
         conj.add(AWTKeyStroke.getAWTKeyStroke(10, 0));
         setFocusTraversalKeys(0, conj);
@@ -111,6 +147,12 @@ public class jRecepcao extends javax.swing.JInternalFrame {
         AutoCompleteDecorator.decorate(jIndicacao);
 
         limpatela();
+        
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                tbmatricula.requestFocus();
+            }
+        });
     }
 
     private void FillIndicados(JComboBox table) {
@@ -141,12 +183,115 @@ public class jRecepcao extends javax.swing.JInternalFrame {
                     sorter2 = new TableRowSorter(clvSeek.getModel());
                     clvSeek.setRowSorter(sorter2);
 
-                    TableControl.add(clvMedicos, new String[][] { { col0, col3, col2, "0", "0", "0", "0", "0" }, { "L", "L", "L", "L", "L", "L", "L", "L" } }, true);
+                    TableControl.add(clvMedicos, new String[][] { { col0, col3, col2, "0", "0", "0", "0", "0" }, { "L", "L", "L", "L", "L", "L", "L", "L" } }, true);                    
                 }
             }
         }
     }
 
+     private void ChamaAgenda(String codMed) {
+        String tsql = "SELECT m.md_nome, a.especialidade, a.datahora, a.paciente " + 
+                "FROM nagenda a, medicos m WHERE a.cdmedico = m.md_codigo AND " + 
+                "m.md_codigo = '" + codMed + "' AND " + 
+                "datahora >= '" + Dates.DateFormat("yyyy/MM/dd", new Date()) + " :00:00:00'::timestamp" +
+                " AND datahora <= '" + Dates.DateFormat("yyyy/MM/dd", new Date()) + " :23:59:59'::timestamp " +
+                "ORDER BY Lower(a.paciente);";
+        ResultSet trs = conn.AbrirTabela(tsql, ResultSet.CONCUR_READ_ONLY);
+        JTable tbl = new JTable();
+        tbl.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        
+        String[][] aheader = { { "Medico", "Especialidade", "Data", "Horario", "Paciênte" }, { "0", "0", "0", "10", "300" } };
+        TableControl.header(tbl, aheader);
+        TableControl.delall(tbl);
+        
+        String nmmedico = null, nmespecialidade = null, mdata = null, mhora = null, nmpaciente = null;
+        try {
+            while (trs.next()) {
+                try { nmmedico = trs.getString("md_nome"); } catch (SQLException e) {}
+                try { nmespecialidade = trs.getString("especialidade"); } catch (SQLException e) {}
+                try { mdata = Dates.DateFormat("dd-MM-yyyy", trs.getTimestamp("datahora")); } catch (SQLException e) {}
+                try { mhora = Dates.DateFormat("HH:mm", trs.getTimestamp("datahora")); } catch (SQLException e) {}
+                try { nmpaciente = trs.getString("paciente"); } catch (SQLException e) {}
+                TableControl.add(tbl, new String[][] { { nmmedico, nmespecialidade, mdata, mhora, nmpaciente }, { "L", "L", "C", "C", "L" } }, true);
+                sorter4 = new TableRowSorter(tbl.getModel());
+                tbl.setRowSorter(sorter4);
+            }
+        } catch (SQLException e) {}
+        try {trs.close();} catch (SQLException e) {}
+        tbl.setSize(300,200);
+        
+        JScrollPane jScrollPane1 = new JScrollPane();
+        jScrollPane1.setViewportView(tbl);
+        JLabel jLabel1000 = new JLabel();
+        jLabel1000.setText("Buscar:");
+        final JTextField jbuscar = new JTextField();
+        jbuscar.addKeyListener(new KeyAdapter() {
+            public void keyReleased(KeyEvent e) {
+                if ("".equals(jbuscar.getText().trim())) {
+                    sorter4.setRowFilter(null);
+                } else {
+                    try {
+                        sorter4.setRowFilter(RowFilter.regexFilter("(?i)" + jbuscar.getText().trim()));
+                    } catch (PatternSyntaxException pse) {System.err.println("Bad regex pattern");}
+                }
+            }
+
+            public void keyTyped(KeyEvent e) {}
+
+            public void keyPressed(KeyEvent e) {}
+        });
+        jbuscar.requestFocus();
+        
+        JPanel panel = new JPanel();
+        GroupLayout layout = new GroupLayout(panel);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane1, GroupLayout.Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 585, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel1000)
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jbuscar)))
+                .addContainerGap())
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane1, GroupLayout.PREFERRED_SIZE, 275, GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1000)
+                    .addComponent(jbuscar, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        panel.setLayout(layout);
+        
+        while (true) {
+            int op = JOptionPane.showConfirmDialog(this, panel,"Selecione o paciênte!",JOptionPane.YES_NO_OPTION); 
+            if (op == JOptionPane.YES_OPTION) {
+                if  (tbl.getSelectedRow() == -1) {
+                    JOptionPane.showMessageDialog(this, "Você tem que selecionar um paciênte na lista!", "Atenção", JOptionPane.INFORMATION_MESSAGE);          
+                } else {
+                    int selRow = tbl.getSelectedRow();
+                    int modelRow = tbl.convertRowIndexToModel(selRow);
+                    String nmpac = tbl.getModel().getValueAt(modelRow, 4).toString().toUpperCase().trim();
+                    
+                    int pos = nmpac.indexOf("/");
+                    if (pos == -1) {
+                        tbnomepac.setText(nmpac);
+                    } else {
+                        tbnomepac.setText(nmpac.substring(0,pos - 1));
+                    }
+                    tbnomepac.requestFocus();
+                    break;
+                }
+            } else break;
+        }
+    }
+    
     private void Fillmedonoff(JTable table) {
         new Settings();
         String tmedicos = System.getProperty("medicoson", "");
@@ -251,6 +396,7 @@ public class jRecepcao extends javax.swing.JInternalFrame {
         jScrollPane4 = new javax.swing.JScrollPane();
         exExames = new javax.swing.JTable();
 
+        setBackground(new java.awt.Color(101, 227, 255));
         setClosable(true);
         setIconifiable(true);
         setTitle(".:: Recepção");
@@ -274,6 +420,7 @@ public class jRecepcao extends javax.swing.JInternalFrame {
         });
         getContentPane().setLayout(null);
 
+        jPanel1.setBackground(new java.awt.Color(101, 227, 255));
         jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder(javax.swing.border.EtchedBorder.RAISED));
 
         jBiometria.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Figuras/dedo.jpg"))); // NOI18N
@@ -408,6 +555,8 @@ public class jRecepcao extends javax.swing.JInternalFrame {
 
         getContentPane().add(jPanel1);
         jPanel1.setBounds(10, 11, 720, 170);
+
+        jPanel2.setBackground(new java.awt.Color(101, 227, 255));
 
         tgbconsulta.setText("Consulta");
         tgbconsulta.setOpaque(true);
@@ -575,6 +724,7 @@ public class jRecepcao extends javax.swing.JInternalFrame {
         getContentPane().add(jpnMedicos);
         jpnMedicos.setBounds(150, -30, 0, 150);
 
+        jPanel4.setBackground(new java.awt.Color(101, 227, 255));
         jPanel4.setBorder(javax.swing.BorderFactory.createEtchedBorder(javax.swing.border.EtchedBorder.RAISED));
 
         clvEspera.setModel(new javax.swing.table.DefaultTableModel(
@@ -617,39 +767,40 @@ public class jRecepcao extends javax.swing.JInternalFrame {
         jPanel4.setLayout(jPanel4Layout);
         jPanel4Layout.setHorizontalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
-                .addContainerGap(14, Short.MAX_VALUE)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addContainerGap(16, Short.MAX_VALUE)
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel4Layout.createSequentialGroup()
-                        .addGap(2, 2, 2)
-                        .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 690, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jbarra, javax.swing.GroupLayout.PREFERRED_SIZE, 690, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(jPanel4Layout.createSequentialGroup()
-                        .addComponent(jTooTips, javax.swing.GroupLayout.PREFERRED_SIZE, 470, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(lbProcurar, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jtxtProcurar, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(jScrollPane6, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 690, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(jbarra, javax.swing.GroupLayout.PREFERRED_SIZE, 690, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(jPanel4Layout.createSequentialGroup()
+                            .addComponent(jTooTips, javax.swing.GroupLayout.PREFERRED_SIZE, 470, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(lbProcurar, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(jtxtProcurar, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addContainerGap())
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
                 .addGap(7, 7, 7)
-                .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, 0)
                 .addComponent(jbarra, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(0, 0, 0)
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jTooTips, javax.swing.GroupLayout.DEFAULT_SIZE, 21, Short.MAX_VALUE)
                     .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(lbProcurar, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jtxtProcurar, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap())
+                .addGap(39, 39, 39))
         );
 
         getContentPane().add(jPanel4);
-        jPanel4.setBounds(10, 240, 720, 199);
+        jPanel4.setBounds(10, 240, 720, 150);
+
+        jPanel6.setBackground(new java.awt.Color(101, 227, 255));
 
         rbtEsperar.setBackground(new java.awt.Color(239, 242, 55));
         rbtEsperar.setText("Esperar");
@@ -712,19 +863,22 @@ public class jRecepcao extends javax.swing.JInternalFrame {
             jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel6Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(rbtEsperar)
-                    .addComponent(rbtDesistiu)
-                    .addComponent(rbtSaidaPaciente)
-                    .addComponent(rbtLimpar)
-                    .addComponent(rbtListaEncerrados))
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(rbtDesistiu, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(rbtSaidaPaciente, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(rbtLimpar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(rbtListaEncerrados, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(rbtEsperar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         getContentPane().add(jPanel6);
-        jPanel6.setBounds(10, 440, 710, 40);
+        jPanel6.setBounds(10, 390, 710, 40);
 
+        jPanel7.setBackground(new java.awt.Color(101, 227, 255));
         jPanel7.setBorder(javax.swing.BorderFactory.createEtchedBorder(javax.swing.border.EtchedBorder.RAISED));
+
+        jpnMedicosemAtendimento.setBackground(new java.awt.Color(101, 227, 255));
 
         clvMedicos.setAutoCreateRowSorter(true);
         clvMedicos.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
@@ -741,7 +895,9 @@ public class jRecepcao extends javax.swing.JInternalFrame {
         });
         jScrollPane2.setViewportView(clvMedicos);
 
-        jpnMedicosemAtendimento.addTab("Médicos em Atendimento", jScrollPane2);
+        jpnMedicosemAtendimento.addTab("<html><b>Médicos em Atendimento</b> <font color=red>(Para ver Agenda selecione o Médico e pressione a letra 'A'.)</font></html>", jScrollPane2);
+
+        jTabbedPane2.setBackground(new java.awt.Color(101, 227, 255));
 
         exExames.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -790,7 +946,7 @@ public class jRecepcao extends javax.swing.JInternalFrame {
             jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel7Layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jpnMedicosemAtendimento, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jpnMedicosemAtendimento, javax.swing.GroupLayout.PREFERRED_SIZE, 700, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
         jPanel7Layout.setVerticalGroup(
@@ -801,8 +957,10 @@ public class jRecepcao extends javax.swing.JInternalFrame {
                 .addContainerGap())
         );
 
+        jpnMedicosemAtendimento.getAccessibleContext().setAccessibleDescription("");
+
         getContentPane().add(jPanel7);
-        jPanel7.setBounds(10, 480, 724, 140);
+        jPanel7.setBounds(10, 430, 720, 140);
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -841,6 +999,11 @@ public class jRecepcao extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_tbmatriculaKeyReleased
 
     private void tbnomepacKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tbnomepacKeyTyped
+        try {
+            w.cancel(true);
+            w = null;
+        } catch (Exception e) {}
+        btnBuscar.setEnabled(true);
         //        String tnome = tbnomepac.getText().trim();
         //        try {
             //          TableControl.Clear(clvPacientes);
@@ -944,6 +1107,11 @@ public class jRecepcao extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_rbtNovoPacienteActionPerformed
 
     private void clvPacientesMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_clvPacientesMouseReleased
+        try {
+            w.cancel(true);
+            w = null;
+        } catch (Exception e) {}
+
         int row = clvPacientes.getSelectedRow();
         String tficha = clvPacientes.getModel().getValueAt(row, 1).toString();
         jFichaPaciente oFichaPac = new jFichaPaciente(null, true);
@@ -1008,9 +1176,10 @@ public class jRecepcao extends javax.swing.JInternalFrame {
         String thora = Dates.DateFormat("HH:mm:ss", new Date());
         boolean batend = true;
         int mRow = clvPacientes.convertRowIndexToModel(sRow);
-        String cdpac = "";
+        String cdpac = ""; String cdmed = "";
         try {cdpac = clvPacientes.getModel().getValueAt(mRow, 1).toString().trim();} catch (Exception err)  { cdpac = ""; }
-        int cpos = FuncoesGlobais.FindinArrays(listaespera, 2, cdpac);
+        try {cdmed = lbespecialidade.getToolTipText();} catch (Exception err)  { cdmed = ""; }
+        int cpos = FuncoesGlobais.FindinArrays(listaespera, new int[] {2,8}, new String[]{cdpac,cdmed});
         if (cpos != -1) {
             JOptionPane.showMessageDialog(null, "Paciente já esta na lista de espera!!!", "Atencao!!!", 1);
         } else {
@@ -1040,11 +1209,88 @@ public class jRecepcao extends javax.swing.JInternalFrame {
                     dadospac = conn.LerCamposTabela(new String[] { "pc_convnumero", "pc_convenio", "pc_inscricao", "pc_nome" }, "pacientes", "pc_numero = '" + cdpac + "'");
                 } catch (Exception err) {}
 
-                int aut = 0; String nvrconsulta = "0,00"; String nvrmedico = "0,00";
-                if (tgbconsulta.isSelected() && dadospac[1][3].trim().toUpperCase().equalsIgnoreCase("PARTICULAR")) {
+                String[][] dadosconv = new String[][] {};
+                try {
+                    //dadosconv = conn.LerCamposTabela(new String[] { "cv_tabelas", "cv_txconsulta", "cv_txproced", "cv_vrpconmed", "cv_vrppromed" }, "convenios", "cv_numero = '" + dadospac[0][3] + "'");
+                    dadosconv = conn.LerCamposTabela(new String[] { "cv_tabelas", "cv_txconsulta", "cv_txproced", "cv_consultavr", "cv_medicovr"}, "convenios", "cv_numero = '" + dadospac[0][3] + "'");
+                } catch (Exception err) {}
+           
+                // Checa se Medico x Convenio
+                Object[][] ddMedTaxas = null;
+                try {
+                    ddMedTaxas = conn.LerCamposTabela(new String[] {"mt_valor", "mt_valormed"}, "medtaxas", "mt_cdmedico = ? and mt_cdconvenio = ?",new Object[][] {
+                        {"int", Integer.valueOf(lbespecialidade.getToolTipText().trim())},
+                        {"int", Integer.valueOf(dadospac[0][3])}
+                    });
+                } catch (Exception e) {}
+                
+                if (ddMedTaxas != null) {
+                    if (ddMedTaxas[0][3] == null && ddMedTaxas[1][3] == null) ddMedTaxas = null;
+                }
+                
+                boolean cbTaxa = false;
+                int tpTaxa = 0;
+                if (ddMedTaxas == null) {
+                    if (tgbconsulta.isSelected()) {
+                        if (LerValor.StringToFloat(dadosconv[1][3]) != 0f || LerValor.StringToFloat(dadosconv[2][3]) != 0f) {
+                            cbTaxa = true;
+
+                            Object[] options = { "Consulta R$ " + LerValor.floatToCurrency(LerValor.StringToFloat(dadosconv[1][3]), 2), "Procedimento R$ " + LerValor.floatToCurrency(LerValor.StringToFloat(dadosconv[2][3]), 2) };
+                            tpTaxa = JOptionPane.showOptionDialog(this, "Cobrar taxa?", "Atenção", 0, 3, null, options, options[0]);
+                        }
+                    }
+                } else {
+                    if (Float.valueOf(ddMedTaxas[0][3].toString()) != 0f || Float.valueOf(ddMedTaxas[1][3].toString()) != 0f) {
+                        dadosconv[1][3] = ddMedTaxas[0][3].toString().replace(".", ",");
+                        dadosconv[2][3] = ddMedTaxas[1][3].toString().replace(".", ",");
+                    }
+                    if (LerValor.StringToFloat(dadosconv[1][3]) != 0f || LerValor.StringToFloat(dadosconv[2][3]) != 0f) {
+                        cbTaxa = true;
+
+                        Object[] options = { "Consulta R$ " + LerValor.floatToCurrency(LerValor.StringToFloat(dadosconv[1][3]), 2), "Procedimento R$ " + LerValor.floatToCurrency(LerValor.StringToFloat(dadosconv[2][3]), 2) };
+                        tpTaxa = JOptionPane.showOptionDialog(this, "Cobrar taxa?", "Atenção", 0, 3, null, options, options[0]);
+                    } else {
+                        cbTaxa = true;                        
+                    }
+                }
+                
+                int aut = 0; String nvrconsulta = "0,00"; String nvrmedico = "0,00"; 
+                String[] tipopag = new String[] {"ND","DN","CH","CT"}; String pagtipo = "";
+                if (tgbconsulta.isSelected() && (dadospac[1][3].trim().toUpperCase().equalsIgnoreCase("PARTICULAR") || cbTaxa)) {
                     jPagRec tpg = new jPagRec(null, true);
                     try {
-                        String[][] vrconsulta = conn.LerCamposTabela(new String[] {"md_vrconsulta", "md_vrmedico"}, "medicos", "md_codigo = '" + lbespecialidade.getToolTipText().trim() + "'");
+                        String[][] vrconsulta = null;
+                        if (!cbTaxa) {
+                            vrconsulta = conn.LerCamposTabela(new String[] {"md_vrconsulta", "md_vrmedico"}, "medicos", "md_codigo = '" + lbespecialidade.getToolTipText().trim() + "'");
+                        } else {
+                            String tvrconsulta = "";
+                            String tvrconmed = "";
+                            if (dadosconv[0][3].toString().equalsIgnoreCase("0")) {
+                                // valor
+                                if (tpTaxa == 0) {
+                                    tvrconsulta = dadosconv[1][3].toString();
+                                    tvrconmed = dadosconv[3][3].toString();
+                                } else {
+                                    tvrconsulta = dadosconv[2][3].toString();
+                                    tvrconmed = dadosconv[4][3].toString();
+                                }
+                            } else {
+                                if (ddMedTaxas == null) {
+                                    // percentual
+                                    if (tpTaxa == 0) {
+                                        tvrconsulta = dadosconv[1][3].toString();
+                                        tvrconmed = LerValor.FloatToString(LerValor.StringToFloat(dadosconv[1][3].toString()) * (LerValor.StringToFloat(dadosconv[3][3].toString()) / 100));
+                                    } else {
+                                        tvrconsulta = dadosconv[2][3].toString();
+                                        tvrconmed = LerValor.FloatToString(LerValor.StringToFloat(dadosconv[2][3].toString()) * (LerValor.StringToFloat(dadosconv[4][3].toString()) / 100));
+                                    }                        
+                                } else {
+                                        tvrconsulta = ddMedTaxas[0][3].toString();
+                                        tvrconmed = ddMedTaxas[1][3].toString();
+                                }
+                            }  
+                            vrconsulta = new String[][] {{"0","0","0",tvrconsulta}, {"0","0","0",tvrconmed}};                            
+                        }
                         if (vrconsulta != null) {
                             tpg.setValor(vrconsulta[0][3].replace(".", ","));
                             nvrconsulta = vrconsulta[0][3];
@@ -1052,7 +1298,7 @@ public class jRecepcao extends javax.swing.JInternalFrame {
                         } else {
                             tpg.setValor("0,00");
                         }
-                    } catch (Exception e) {}
+                    } catch (Exception e) { e.printStackTrace(); }
                     tpg.setVisible(true);
                     Object[] retorno = tpg.getPagRec();
                     // System.out.println("tipo: " + retorno[0]);
@@ -1062,28 +1308,41 @@ public class jRecepcao extends javax.swing.JInternalFrame {
                     // System.out.println("NR: " + ((Object[])retorno[2])[2]);
                     // System.out.println("DT: " + ((Object[])retorno[2])[3]);
                     tpg = null;
-                    String[] tipopag = new String[] {"ND","DN","CH","CT"};
+                    
                     if (Integer.valueOf(retorno[0].toString()) == 0) return;
-                    java.sql.Date datap = Dates.toSqlDate(Dates.StringtoDate((String)((Object[])retorno[2])[3],"dd-MM-yyyy"));
-                    String pbanco = (String)((Object[])retorno[2])[0];
-                    String pagencia = (String)((Object[])retorno[2])[1];
-                    String pncheque = (String)((Object[])retorno[2])[2];
-                    String pnrcartao = (String)retorno[1];
-                    aut = conn.LancarCaixa(
-                        "CRE",
-                        tipopag[Integer.valueOf(retorno[0].toString())],
-                        "REC",
-                        Integer.valueOf(cdpac),
-                        datap,
-                        pbanco,
-                        pagencia,
-                        pncheque,
-                        pnrcartao,
-                        new BigDecimal(nvrconsulta),
-                        Integer.valueOf(VariaveisGlobais.cdlogado)
-                    );
-                    if (aut == 0) return;
-
+                    if (ddMedTaxas == null) {
+                        java.util.Date datap = Dates.StringtoDate((String)((Object[])retorno[2])[3],"dd-MM-yyyy");
+                        String pbanco = (String)((Object[])retorno[2])[0];
+                        String pagencia = (String)((Object[])retorno[2])[1];
+                        String pncheque = (String)((Object[])retorno[2])[2];
+                        String pnrcartao = (String)retorno[1];
+                        pagtipo = tipopag[Integer.valueOf(retorno[0].toString())];
+                        aut = conn.LancarCaixa(
+                            "CRE",
+                            pagtipo,
+                            "REC",
+                            Integer.valueOf(cdpac),
+                            datap,
+                            pbanco,
+                            pagencia,
+                            pncheque,
+                            pnrcartao,
+                            new BigDecimal(nvrconsulta),
+                            Integer.valueOf(VariaveisGlobais.cdlogado)
+                        );
+                        if (aut == 0) return;                        
+                        //ddMedTaxas = null;
+                    }
+                } else {
+                    if (ddMedTaxas != null) {
+                        String[][] vrconsulta = {{"0","0","0",(String)ddMedTaxas[0][3]}, {"0","0","0",(String)ddMedTaxas[1][3]}};
+                        nvrconsulta = vrconsulta[0][3];
+                        nvrmedico = vrconsulta[1][3];
+                        aut = -1;
+                    } else {
+                        nvrconsulta = dadosconv[3][3];
+                        nvrmedico = dadosconv[4][3];
+                    }                   
                 }
 
                 if (dadospac[1][3].trim().toUpperCase().equalsIgnoreCase("PARTICULAR")) {
@@ -1103,9 +1362,74 @@ public class jRecepcao extends javax.swing.JInternalFrame {
                     nvrconsulta + "','" +
                     nvrmedico + "')";
                     try {conn.ExecutarComando(msql);} catch (Exception e) {e.printStackTrace();}
+                    
+                    // Impressão do recibo
+                    ImprimeReciboParticularPDF(aut,new String[][] {{"","","","",nvrconsulta,pagtipo,"RC","",""}},nvrconsulta,"F",VariaveisGlobais.nviasRecibo,VariaveisGlobais.nviasRecibo);
+                } else if (cbTaxa && ddMedTaxas == null) {
+                    if (nvrconsulta.contains(",")) nvrconsulta = nvrconsulta.replace(",", ".");
+                    if (nvrmedico.contains(",")) nvrmedico = nvrmedico.replace(",", ".");
+                    String ctSQL = "insert into convtaxas (ct_data, ct_conv, ct_medico, ct_pcnumero, ct_valor, ct_vrmed, ct_conproc, ct_tppagto, ct_aut) values (?, ?, ?, ?, ?, ?, ?, ?, ?);";
+                    Object[][] param = new Object[][] {
+                        {"date", Dates.toSqlDate(new Date())},
+                        {"int", Integer.valueOf(dadospac[0][3].trim())},
+                        {"int", Integer.valueOf(lbespecialidade.getToolTipText().trim())},
+                        {"int", Integer.valueOf(cdpac)},
+                        {"decimal", new BigDecimal(nvrconsulta)},
+                        {"decimal", new BigDecimal(nvrmedico)},
+                        {"int",Integer.valueOf(dadosconv[0][3].toString())},
+                        {"string",pagtipo},
+                        {"int", aut}
+                    };
+                    try {conn.ExecutarComando(ctSQL, param);} catch (Exception e) {e.printStackTrace();}
+                } else if (cbTaxa && ddMedTaxas != null) {
+                    if (nvrconsulta.contains(",")) nvrconsulta = nvrconsulta.replace(",", ".");
+                    if (nvrmedico.contains(",")) nvrmedico = nvrmedico.replace(",", ".");
+
+                    // Salva no caixa como TX
+                    java.util.Date datap = new java.util.Date();
+                    aut = conn.LancarCaixa(
+                        "CRE",
+                        "TX",
+                        "REC",
+                        Integer.valueOf(cdpac),
+                        datap,
+                        "",
+                        "",
+                        "",
+                        "",
+                        new BigDecimal(nvrconsulta),
+                        Integer.valueOf(VariaveisGlobais.cdlogado)
+                    );
+                    if (aut == 0) return;
+                    
+                    String ctSQL = "insert into convtaxas (ct_data, ct_conv, ct_medico, ct_pcnumero, ct_valor, ct_vrmed, ct_conproc, ct_tppagto, ct_aut) values (?, ?, ?, ?, ?, ?, ?, ?, ?);";
+                    Object[][] param = new Object[][] {
+                        {"date", Dates.toSqlDate(new Date())},
+                        {"int", Integer.valueOf(dadospac[0][3].trim())},
+                        {"int", Integer.valueOf(lbespecialidade.getToolTipText().trim())},
+                        {"int", Integer.valueOf(cdpac)},
+                        {"decimal", new BigDecimal(nvrconsulta)},
+                        {"decimal", new BigDecimal(nvrmedico)},
+                        {"int",Integer.valueOf("0")},
+                        {"string","TX"},
+                        {"int", aut}
+                    };
+                    try {conn.ExecutarComando(ctSQL, param);} catch (Exception e) {e.printStackTrace();}
+                    
+                    // Impressao do Recibo
+                    ImprimeReciboTaxasPDF(aut,new String[][] {{"","","","",nvrconsulta,pagtipo,"RC","",""}},nvrconsulta,"F",VariaveisGlobais.nviasRecibo,VariaveisGlobais.nviasRecibo);
                 }
 
-                String isql = "insert into marcar (ma_data, ma_hora, ma_codmedico, ma_medico, ma_categoria, ma_nome, ma_consulta, ma_revisao, ma_cortesia, ma_status, ma_plano, ma_inscricao, ma_origem, ma_convnumero,ma_pcnumero,ma_indicado,autenticacao) values ('" + Dates.DateFormat("yyyy-MM-dd", new Date()) + "','" + thora + "','" + lbespecialidade.getToolTipText().trim() + "','" + lbmedico.getText() + "','" + lbespecialidade.getText() + "','" + dadospac[3][3].toUpperCase() + "','" + (tgbconsulta.isSelected() ? 1 : 0) + "','" + (tgbrevisao.isSelected() ? 1 : 0) + "','" + (tgbcortesia.isSelected() ? 1 : 0) + "','0','" + dadospac[1][3].toUpperCase().trim() + "','" + dadospac[2][3].trim() + "','" + VariaveisGlobais.origem + "','" + dadospac[0][3].trim() + "','" + cdpac + "','" + jIndicacao.getModel().getSelectedItem().toString().toUpperCase().trim() + "','" + aut + "')";
+                // Atualiza marcar
+                if (nvrconsulta.contains(",")) nvrconsulta = nvrconsulta.replace(",", ".");
+                if (nvrmedico.contains(",")) nvrmedico = nvrmedico.replace(",", ".");
+                String isql = "insert into marcar (ma_data, ma_hora, ma_codmedico, ma_medico, ma_categoria, ma_nome, ma_consulta, ma_revisao, ma_cortesia, ma_status, ma_plano, ma_inscricao, ma_origem, ma_convnumero,ma_pcnumero,ma_indicado,autenticacao,cv_consultavr,cv_medicovr) values ('" + 
+                        Dates.DateFormat("yyyy-MM-dd", new Date()) + "','" + thora + "','" + lbespecialidade.getToolTipText().trim() + "','" + lbmedico.getText() + "','" +
+                        lbespecialidade.getText() + "','" + dadospac[3][3].toUpperCase() + "','" + (tgbconsulta.isSelected() ? 1 : 0) + "','" + 
+                        (tgbrevisao.isSelected() ? 1 : 0) + "','" + (tgbcortesia.isSelected() ? 1 : 0) + "','0','" + dadospac[1][3].toUpperCase().trim() + "','" + 
+                        dadospac[2][3].trim() + "','" + VariaveisGlobais.origem + "','" + dadospac[0][3].trim() + "','" + cdpac + "','" + 
+                        jIndicacao.getModel().getSelectedItem().toString().toUpperCase().trim() + "','" + aut + "'," + 
+                        new BigDecimal(nvrconsulta) + "," + new BigDecimal(nvrmedico) + ")";
                 conn.ExecutarComando(isql);
 
                 conn.Auditor("CONSULTA: INSERIU:" + lbmedico.getText().toUpperCase().trim(), dadospac[3][3].toUpperCase().trim());
@@ -1119,15 +1443,521 @@ public class jRecepcao extends javax.swing.JInternalFrame {
                     os.println("@" + lgmedico.toLowerCase() + " " + cdpac + ";ins");
                 } catch (Exception err) {}
                 addespera(thora, String.valueOf(aut));
-
-                //            if (JOptionPane.showConfirmDialog(this, "Deseja imprimir o recibo?","Imprimir?",YES_NO_OPTION) == YES_OPTION) {
-                    //
-                    //            }
                 limpatela();
             }
         }
     }//GEN-LAST:event_rbtEsperarActionPerformed
 
+   public void ImprimeReciboParticularPDF(float nAut, String[][] Valores, String ValorRec, String cutPaper,int via, float nRecibos) {
+       System.out.println("ImprimeReciboParticularPDF");
+
+        int sRow = clvPacientes.getSelectedRow();
+        if (sRow < 0) return;
+        int mRow = clvPacientes.convertRowIndexToModel(sRow);
+        String cdpac = ""; String cdmed = ""; String nmmed = ""; String nmesp = ""; String nmpac = null;
+        try {cdpac = clvPacientes.getModel().getValueAt(mRow, 1).toString().trim();} catch (Exception err)  { cdpac = ""; }
+        try {nmpac = clvPacientes.getModel().getValueAt(mRow, 3).toString().trim();} catch (Exception err)  { nmpac = ""; }
+        try {cdmed = lbespecialidade.getToolTipText();} catch (Exception err)  { cdmed = ""; }
+        nmmed = lbmedico.getText().toUpperCase();
+        try {nmesp = lbespecialidade.getText();} catch (Exception err)  { cdmed = ""; }
+       
+       float[] columnWidths = {};
+        Collections gVar = VariaveisGlobais.dCliente;
+        jPDF pdf = new jPDF();
+        pdf.setPathName("reports/Recibos/" + Dates.iYear(new Date()) + "/" + Dates.Month(new Date()) + "/");
+        String docID = "_" + cdpac + ".pdf";
+        String docName = "RC_" + Dates.DateFormat("ddMMyyyy", new Date()) + "_" + 
+                FuncoesGlobais.StrZero(String.valueOf((int)nAut), 7) + "-" + 
+                FuncoesGlobais.StrZero(String.valueOf((int)via), 2) + "_" + FuncoesGlobais.StrZero(String.valueOf((int)nRecibos), 2) + docID;
+        pdf.setDocName(docName);
+        
+        BaseFont bf = null;
+        try {
+            bf = BaseFont.createFont(BaseFont.HELVETICA, BaseFont.WINANSI, BaseFont.EMBEDDED);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        com.itextpdf.text.Font font = new com.itextpdf.text.Font(bf, 9, Font.PLAIN);
+
+        pdf.open();
+        
+        // Logo
+        com.itextpdf.text.Image img;
+        try {
+            Image t_img = new ResizeImageIcon("E", VariaveisGlobais.logo, 80, 30).getImg().getImage();
+            img = com.itextpdf.text.Image.getInstance(t_img, Color.BLACK);
+            img.setAlignment(Element.ALIGN_LEFT);        
+            pdf.doc_add(img);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        Paragraph p;
+        
+        p = pdf.print(gVar.get("empresa"), pdf.HELVETICA, 9, pdf.NORMAL, pdf.LEFT, pdf.BLACK);
+        pdf.doc_add(p);
+        if (!gVar.get("cnpj").trim().equals("") || gVar.get("cnpj") != null) {
+            p = pdf.print(gVar.get("cnpj"), pdf.HELVETICA, 9, pdf.NORMAL, pdf.LEFT,pdf.BLACK);
+            pdf.doc_add(p);
+        }
+        p = pdf.print(gVar.get("endereco") + ", " + gVar.get("numero") + " " + gVar.get("complemento"), pdf.HELVETICA, 9, pdf.NORMAL, pdf.LEFT, pdf.BLACK);
+        pdf.doc_add(p);
+        p = pdf.print(gVar.get("bairro") + " - " + gVar.get("cidade") + " - " + gVar.get("estado") + " - " + gVar.get("cep"), pdf.HELVETICA, 9, pdf.NORMAL, pdf.LEFT, pdf.BLACK);
+        pdf.doc_add(p);
+        p = pdf.print("Tel:" + gVar.get("telefone"), pdf.HELVETICA, 9, pdf.NORMAL, pdf.LEFT, pdf.BLACK);
+        pdf.doc_add(p);
+        p = pdf.print("\n", pdf.HELVETICA, 9, pdf.NORMAL, pdf.CENTER, pdf.BLACK);
+        pdf.doc_add(p);
+        p = pdf.print((nAut >0 ? gVar.get("recibo") : "D E M O N S T R A T I V O"), pdf.HELVETICA, 12, pdf.BOLD, pdf.CENTER, pdf.BLUE);
+        pdf.doc_add(p);
+        p = pdf.print("\n", pdf.HELVETICA, 9, pdf.NORMAL, pdf.CENTER, pdf.BLACK);
+        pdf.doc_add(p);
+        
+        columnWidths = new float[] {37, 63 };
+        PdfPTable table = new PdfPTable(columnWidths);
+        table.setHeaderRows(0);
+        table.setWidthPercentage(100);
+        font = new com.itextpdf.text.Font(bf, 9, Font.PLAIN);
+        font.setColor(BaseColor.BLACK);
+        
+        PdfPCell cell1 = new PdfPCell(new Phrase("CAIXA: " + VariaveisGlobais.logado,font));
+        cell1.setHorizontalAlignment(Element.ALIGN_LEFT);
+        cell1.setBorder(Rectangle.NO_BORDER);
+        table.addCell(cell1);
+        PdfPCell cell2 = new PdfPCell(new Phrase("Data/Hora: " + Dates.DateFormat("dd/MM/yyyy HH:mm", new Date()),font));
+        cell2.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        cell2.setBorder(Rectangle.NO_BORDER);
+        table.addCell(cell2);
+        table.completeRow();
+        pdf.doc_add(table);
+
+        p = pdf.print("", pdf.HELVETICA, 9, pdf.NORMAL, pdf.CENTER, pdf.BLACK);
+        LineSeparator l = new LineSeparator();
+        l.setPercentage(100f);
+        p.add(new Chunk(l));
+        pdf.doc_add(p);
+
+        // Dados do locatario
+        columnWidths = new float[] {35, 65 };
+        table = new PdfPTable(columnWidths);
+        table.setHeaderRows(0);
+        table.setWidthPercentage(100);
+
+        font = new com.itextpdf.text.Font(bf, 8, Font.PLAIN);        
+        cell1 = new PdfPCell(new Phrase("Paciente: " + cdpac,font));
+        cell1.setHorizontalAlignment(Element.ALIGN_LEFT);
+        cell1.setBorder(Rectangle.NO_BORDER);
+        table.addCell(cell1);
+        cell2 = new PdfPCell(new Phrase(StringManager.ConvStr(nmpac.toString()),font));
+        cell2.setHorizontalAlignment(Element.ALIGN_LEFT);
+        cell2.setBorder(Rectangle.NO_BORDER);
+        table.addCell(cell2);        
+        
+        font = new com.itextpdf.text.Font(bf, 8, Font.PLAIN);        
+        PdfPCell cell3 = new PdfPCell(new Phrase("Médico: " + cdmed,font));
+        cell3.setHorizontalAlignment(Element.ALIGN_LEFT);
+        cell3.setBorder(Rectangle.NO_BORDER);
+        table.addCell(cell3);
+        PdfPCell cell4 = new PdfPCell(new Phrase(StringManager.ConvStr(nmmed.toString()),font));
+        cell4.setHorizontalAlignment(Element.ALIGN_LEFT);
+        cell4.setBorder(Rectangle.NO_BORDER);
+        table.addCell(cell4);        
+
+        font = new com.itextpdf.text.Font(bf, 8, Font.PLAIN);        
+        PdfPCell cell5 = new PdfPCell(new Phrase("",font));
+        cell5.setHorizontalAlignment(Element.ALIGN_LEFT);
+        cell5.setBorder(Rectangle.NO_BORDER);
+        table.addCell(cell5);
+        PdfPCell cell6 = new PdfPCell(new Phrase(StringManager.ConvStr(nmesp.toString()),font));
+        cell6.setHorizontalAlignment(Element.ALIGN_LEFT);
+        cell6.setBorder(Rectangle.NO_BORDER);
+        table.addCell(cell6);        
+        table.completeRow();
+        pdf.doc_add(table);
+
+        p = pdf.print("\n", pdf.HELVETICA, 9, pdf.NORMAL, pdf.CENTER, pdf.BLACK);
+        pdf.doc_add(p);
+
+        // Cabeçario do recibo
+        columnWidths = new float[] {70, 30};
+        table = new PdfPTable(columnWidths);
+        table.setHeaderRows(0);
+        table.setWidthPercentage(100);
+        font.setColor(BaseColor.WHITE);
+        cell1 = new PdfPCell(new Phrase("DESCRIMINAÇÃO",font));
+        cell1.setHorizontalAlignment(Element.ALIGN_LEFT);
+        cell1.setBorder(Rectangle.NO_BORDER);
+        cell1.setBackgroundColor(BaseColor.BLACK);
+        table.addCell(cell1);
+        cell3 = new PdfPCell(new Phrase("VALOR", font));
+        cell3.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        cell3.setBorder(Rectangle.NO_BORDER);
+        cell3.setBackgroundColor(BaseColor.BLACK);
+        table.addCell(cell3);
+        table.completeRow();
+        pdf.doc_add(table);
+
+        columnWidths = new float[] {70, 30};
+        table = new PdfPTable(columnWidths);
+        table.setHeaderRows(0);
+        table.setWidthPercentage(100);
+
+        // Dados do recibo
+        font.setColor(BaseColor.BLACK);
+        cell1 = new PdfPCell(new Phrase((String) "Consulta",font));
+        cell1.setHorizontalAlignment(Element.ALIGN_LEFT);
+        cell1.setBorder(Rectangle.NO_BORDER);
+        cell1.setBackgroundColor(BaseColor.WHITE);
+        table.addCell(cell1);
+        
+        NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.US);
+        
+        cell3 = new PdfPCell(new Phrase(LerValor.floatToCurrency(Float.valueOf(ValorRec),2), font));
+        cell3.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        cell3.setBorder(Rectangle.NO_BORDER);
+        cell3.setBackgroundColor(BaseColor.WHITE);
+        table.addCell(cell3);
+
+        font.setColor(BaseColor.BLACK);
+        cell1 = new PdfPCell(new Phrase("",font));
+        cell1.setHorizontalAlignment(Element.ALIGN_LEFT);
+        cell1.setBorder(Rectangle.NO_BORDER);
+        cell1.setBackgroundColor(BaseColor.WHITE);
+        table.addCell(cell1);
+        cell3 = new PdfPCell(new Phrase("==========", font));
+        cell3.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        cell3.setBorder(Rectangle.NO_BORDER);
+        cell3.setBackgroundColor(BaseColor.WHITE);
+        table.addCell(cell3);
+
+        font.setColor(BaseColor.BLACK);
+        cell1 = new PdfPCell(new Phrase("Total do Recibo",font));
+        cell1.setHorizontalAlignment(Element.ALIGN_LEFT);
+        cell1.setBorder(Rectangle.NO_BORDER);
+        cell1.setBackgroundColor(BaseColor.WHITE);
+        table.addCell(cell1);
+        cell3 = new PdfPCell(new Phrase(LerValor.floatToCurrency(Float.valueOf(ValorRec),2), font));
+        cell3.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        cell3.setBorder(Rectangle.NO_BORDER);
+        cell3.setBackgroundColor(BaseColor.WHITE);
+        table.addCell(cell3);
+        table.completeRow();
+        pdf.doc_add(table);
+
+        p = pdf.print("\n", pdf.HELVETICA, 9, pdf.NORMAL, pdf.CENTER, pdf.BLACK);
+        pdf.doc_add(p);
+        
+        font = new com.itextpdf.text.Font(bf, 8, Font.PLAIN);
+        if (nAut > 0) {
+            p = pdf.print("__________ VALOR(ES) LANCADOS __________", pdf.HELVETICA, 7, pdf.NORMAL, pdf.CENTER, pdf.BLACK);
+            pdf.doc_add(p);
+
+            for (int i=0;i<Valores.length;i++) {
+                String bLinha = "";
+                if (!"".equals(Valores[i][1].trim())) {
+                    bLinha = "BCO:" + new Pad(Valores[i][1],3).RPad() + " AG:" + new Pad(Valores[i][2],4).RPad() + " CH:" + new Pad(Valores[i][3],8).RPad() + " DT: " + new Pad(Valores[i][0],10).CPad() + " VR:" + new Pad(Valores[i][4],10).LPad();
+                } else {
+                    bLinha = (Valores[i][5].trim().toUpperCase().equalsIgnoreCase("CT") ? "BC" : Valores[i][5].trim().toUpperCase()) +  ":" + new Pad(LerValor.floatToCurrency(Float.valueOf(Valores[i][4]),2),10).LPad();
+                }
+
+                p = pdf.print(bLinha, pdf.HELVETICA, 6, pdf.NORMAL, pdf.RIGHT, pdf.BLACK);
+                pdf.doc_add(p);
+            }
+
+            p = pdf.print("\n", pdf.HELVETICA, 6, pdf.NORMAL, pdf.LEFT, pdf.BLACK);
+            pdf.doc_add(p);
+
+            l = new LineSeparator();
+            l.setPercentage(100f);
+            p = pdf.print("", pdf.HELVETICA, 7, pdf.BOLDITALIC, pdf.LEFT, pdf.BLACK);
+            p.add(new Chunk(l));
+            pdf.doc_add(p);
+
+            // Imprimir Autenticação
+            p = pdf.print(VariaveisGlobais.dCliente.get("marca").trim() + "RC" + FuncoesGlobais.StrZero(String.valueOf((int)nAut), 7) + "-" +
+                          FuncoesGlobais.StrZero(String.valueOf((int)via), 2) + "/" + FuncoesGlobais.StrZero(String.valueOf((int)nRecibos), 2) + 
+                          Dates.DateFormat("ddMMyyyyHHmmss", new Date()) + FuncoesGlobais.GravaValores(ValorRec.replace(".", ","), 2) + VariaveisGlobais.logado, pdf.HELVETICA, 7, pdf.NORMAL, pdf.CENTER, pdf.BLACK);
+            pdf.doc_add(p);
+            
+            PdfContentByte cb = pdf.writer().getDirectContent();
+            BarcodeInter25 code25 = new BarcodeInter25();
+            String barra = FuncoesGlobais.StrZero(String.valueOf((int)nAut),16);
+            code25.setCode(barra);
+            code25.setChecksumText(true);
+            code25.setFont(null);
+            com.itextpdf.text.Image cdbar = code25.createImageWithBarcode(cb, null, null);
+            cdbar.setAlignment(Element.ALIGN_CENTER);
+            pdf.doc_add(cdbar);            
+        }
+
+        // Pula linhas (6) / corta papel
+        for (int k=1;k<=6;k++) { 
+            p = pdf.print("\n", pdf.HELVETICA, 6, pdf.NORMAL, pdf.LEFT, pdf.BLACK);
+            pdf.doc_add(p);
+        }
+        
+        pdf.close();
+        //pdf.print();
+        new toPrint(pdf.getPathName() + docName, VariaveisGlobais.Recibo.split(",")[0],VariaveisGlobais.Recibo.split(",")[1],VariaveisGlobais.Recibo.split(",")[2]);
+        pdf.setPathName("");
+        pdf.setDocName("");
+   }
+    
+   public void ImprimeReciboTaxasPDF(float nAut, String[][] Valores, String ValorRec, String cutPaper,int via, float nRecibos) {
+       System.out.println("ImprimeReciboTaxasPDF");
+
+        int sRow = clvPacientes.getSelectedRow();
+        if (sRow < 0) return;
+        int mRow = clvPacientes.convertRowIndexToModel(sRow);
+        String cdpac = ""; String cdmed = ""; String nmmed = ""; String nmesp = ""; String nmpac = null;
+        try {cdpac = clvPacientes.getModel().getValueAt(mRow, 1).toString().trim();} catch (Exception err)  { cdpac = ""; }
+        try {nmpac = clvPacientes.getModel().getValueAt(mRow, 3).toString().trim();} catch (Exception err)  { nmpac = ""; }
+        try {cdmed = lbespecialidade.getToolTipText();} catch (Exception err)  { cdmed = ""; }
+        nmmed = lbmedico.getText().toUpperCase();
+        try {nmesp = lbespecialidade.getText();} catch (Exception err)  { cdmed = ""; }
+       
+       float[] columnWidths = {};
+        Collections gVar = VariaveisGlobais.dCliente;
+        jPDF pdf = new jPDF();
+        pdf.setPathName("reports/Recibos/" + Dates.iYear(new Date()) + "/" + Dates.Month(new Date()) + "/");
+        String docID = "_" + cdpac + ".pdf";
+        String docName = "RC_" + Dates.DateFormat("ddMMyyyy", new Date()) + "_" + 
+                FuncoesGlobais.StrZero(String.valueOf((int)nAut), 7) + "-" + 
+                FuncoesGlobais.StrZero(String.valueOf((int)via), 2) + "_" + FuncoesGlobais.StrZero(String.valueOf((int)nRecibos), 2) + docID;
+        pdf.setDocName(docName);
+        
+        BaseFont bf = null;
+        try {
+            bf = BaseFont.createFont(BaseFont.HELVETICA, BaseFont.WINANSI, BaseFont.EMBEDDED);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        com.itextpdf.text.Font font = new com.itextpdf.text.Font(bf, 9, Font.PLAIN);
+
+        pdf.open();
+        
+        // Logo
+        com.itextpdf.text.Image img;
+        try {
+            Image t_img = new ResizeImageIcon("E", VariaveisGlobais.logo, 80, 30).getImg().getImage();
+            img = com.itextpdf.text.Image.getInstance(t_img, Color.BLACK);
+            img.setAlignment(Element.ALIGN_LEFT);        
+            pdf.doc_add(img);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        Paragraph p;
+        
+        p = pdf.print(gVar.get("empresa"), pdf.HELVETICA, 9, pdf.NORMAL, pdf.LEFT, pdf.BLACK);
+        pdf.doc_add(p);
+        if (!gVar.get("cnpj").trim().equals("") || gVar.get("cnpj") != null) {
+            p = pdf.print(gVar.get("cnpj"), pdf.HELVETICA, 9, pdf.NORMAL, pdf.LEFT,pdf.BLACK);
+            pdf.doc_add(p);
+        }
+        p = pdf.print(gVar.get("endereco") + ", " + gVar.get("numero") + " " + gVar.get("complemento"), pdf.HELVETICA, 9, pdf.NORMAL, pdf.LEFT, pdf.BLACK);
+        pdf.doc_add(p);
+        p = pdf.print(gVar.get("bairro") + " - " + gVar.get("cidade") + " - " + gVar.get("estado") + " - " + gVar.get("cep"), pdf.HELVETICA, 9, pdf.NORMAL, pdf.LEFT, pdf.BLACK);
+        pdf.doc_add(p);
+        p = pdf.print("Tel:" + gVar.get("telefone"), pdf.HELVETICA, 9, pdf.NORMAL, pdf.LEFT, pdf.BLACK);
+        pdf.doc_add(p);
+        p = pdf.print("\n", pdf.HELVETICA, 9, pdf.NORMAL, pdf.CENTER, pdf.BLACK);
+        pdf.doc_add(p);
+        p = pdf.print((nAut >0 ? gVar.get("recibo") : "D E M O N S T R A T I V O"), pdf.HELVETICA, 12, pdf.BOLD, pdf.CENTER, pdf.BLUE);
+        pdf.doc_add(p);
+        p = pdf.print("\n", pdf.HELVETICA, 9, pdf.NORMAL, pdf.CENTER, pdf.BLACK);
+        pdf.doc_add(p);
+        
+        columnWidths = new float[] {37, 63 };
+        PdfPTable table = new PdfPTable(columnWidths);
+        table.setHeaderRows(0);
+        table.setWidthPercentage(100);
+        font = new com.itextpdf.text.Font(bf, 9, Font.PLAIN);
+        font.setColor(BaseColor.BLACK);
+        
+        PdfPCell cell1 = new PdfPCell(new Phrase("CAIXA: " + VariaveisGlobais.logado,font));
+        cell1.setHorizontalAlignment(Element.ALIGN_LEFT);
+        cell1.setBorder(Rectangle.NO_BORDER);
+        table.addCell(cell1);
+        PdfPCell cell2 = new PdfPCell(new Phrase("Data/Hora: " + Dates.DateFormat("dd/MM/yyyy HH:mm", new Date()),font));
+        cell2.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        cell2.setBorder(Rectangle.NO_BORDER);
+        table.addCell(cell2);
+        table.completeRow();
+        pdf.doc_add(table);
+
+        p = pdf.print("", pdf.HELVETICA, 9, pdf.NORMAL, pdf.CENTER, pdf.BLACK);
+        LineSeparator l = new LineSeparator();
+        l.setPercentage(100f);
+        p.add(new Chunk(l));
+        pdf.doc_add(p);
+
+        // Dados do locatario
+        columnWidths = new float[] {35, 65 };
+        table = new PdfPTable(columnWidths);
+        table.setHeaderRows(0);
+        table.setWidthPercentage(100);
+
+        font = new com.itextpdf.text.Font(bf, 8, Font.PLAIN);        
+        cell1 = new PdfPCell(new Phrase("Paciente: " + cdpac,font));
+        cell1.setHorizontalAlignment(Element.ALIGN_LEFT);
+        cell1.setBorder(Rectangle.NO_BORDER);
+        table.addCell(cell1);
+        cell2 = new PdfPCell(new Phrase(StringManager.ConvStr(nmpac.toString()),font));
+        cell2.setHorizontalAlignment(Element.ALIGN_LEFT);
+        cell2.setBorder(Rectangle.NO_BORDER);
+        table.addCell(cell2);        
+        
+        font = new com.itextpdf.text.Font(bf, 8, Font.PLAIN);        
+        PdfPCell cell3 = new PdfPCell(new Phrase("Médico: " + cdmed,font));
+        cell3.setHorizontalAlignment(Element.ALIGN_LEFT);
+        cell3.setBorder(Rectangle.NO_BORDER);
+        table.addCell(cell3);
+        PdfPCell cell4 = new PdfPCell(new Phrase(StringManager.ConvStr(nmmed.toString()),font));
+        cell4.setHorizontalAlignment(Element.ALIGN_LEFT);
+        cell4.setBorder(Rectangle.NO_BORDER);
+        table.addCell(cell4);        
+
+        font = new com.itextpdf.text.Font(bf, 8, Font.PLAIN);        
+        PdfPCell cell5 = new PdfPCell(new Phrase("",font));
+        cell5.setHorizontalAlignment(Element.ALIGN_LEFT);
+        cell5.setBorder(Rectangle.NO_BORDER);
+        table.addCell(cell5);
+        PdfPCell cell6 = new PdfPCell(new Phrase(StringManager.ConvStr(nmesp.toString()),font));
+        cell6.setHorizontalAlignment(Element.ALIGN_LEFT);
+        cell6.setBorder(Rectangle.NO_BORDER);
+        table.addCell(cell6);        
+        table.completeRow();
+        pdf.doc_add(table);
+
+        p = pdf.print("\n", pdf.HELVETICA, 9, pdf.NORMAL, pdf.CENTER, pdf.BLACK);
+        pdf.doc_add(p);
+
+        // Cabeçario do recibo
+        columnWidths = new float[] {70, 30};
+        table = new PdfPTable(columnWidths);
+        table.setHeaderRows(0);
+        table.setWidthPercentage(100);
+        font.setColor(BaseColor.WHITE);
+        cell1 = new PdfPCell(new Phrase("DESCRIMINAÇÃO",font));
+        cell1.setHorizontalAlignment(Element.ALIGN_LEFT);
+        cell1.setBorder(Rectangle.NO_BORDER);
+        cell1.setBackgroundColor(BaseColor.BLACK);
+        table.addCell(cell1);
+        cell3 = new PdfPCell(new Phrase("VALOR", font));
+        cell3.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        cell3.setBorder(Rectangle.NO_BORDER);
+        cell3.setBackgroundColor(BaseColor.BLACK);
+        table.addCell(cell3);
+        table.completeRow();
+        pdf.doc_add(table);
+
+        columnWidths = new float[] {70, 30};
+        table = new PdfPTable(columnWidths);
+        table.setHeaderRows(0);
+        table.setWidthPercentage(100);
+
+        // Dados do recibo
+        font.setColor(BaseColor.BLACK);
+        cell1 = new PdfPCell(new Phrase((String) "Taxa",font));
+        cell1.setHorizontalAlignment(Element.ALIGN_LEFT);
+        cell1.setBorder(Rectangle.NO_BORDER);
+        cell1.setBackgroundColor(BaseColor.WHITE);
+        table.addCell(cell1);
+        
+        NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.US);
+        
+        cell3 = new PdfPCell(new Phrase(LerValor.floatToCurrency(Float.valueOf(ValorRec),2), font));
+        cell3.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        cell3.setBorder(Rectangle.NO_BORDER);
+        cell3.setBackgroundColor(BaseColor.WHITE);
+        table.addCell(cell3);
+
+        font.setColor(BaseColor.BLACK);
+        cell1 = new PdfPCell(new Phrase("",font));
+        cell1.setHorizontalAlignment(Element.ALIGN_LEFT);
+        cell1.setBorder(Rectangle.NO_BORDER);
+        cell1.setBackgroundColor(BaseColor.WHITE);
+        table.addCell(cell1);
+        cell3 = new PdfPCell(new Phrase("==========", font));
+        cell3.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        cell3.setBorder(Rectangle.NO_BORDER);
+        cell3.setBackgroundColor(BaseColor.WHITE);
+        table.addCell(cell3);
+
+        font.setColor(BaseColor.BLACK);
+        cell1 = new PdfPCell(new Phrase("Total do Recibo",font));
+        cell1.setHorizontalAlignment(Element.ALIGN_LEFT);
+        cell1.setBorder(Rectangle.NO_BORDER);
+        cell1.setBackgroundColor(BaseColor.WHITE);
+        table.addCell(cell1);
+        cell3 = new PdfPCell(new Phrase(LerValor.floatToCurrency(Float.valueOf(ValorRec),2), font));
+        cell3.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        cell3.setBorder(Rectangle.NO_BORDER);
+        cell3.setBackgroundColor(BaseColor.WHITE);
+        table.addCell(cell3);
+        table.completeRow();
+        pdf.doc_add(table);
+
+        p = pdf.print("\n", pdf.HELVETICA, 9, pdf.NORMAL, pdf.CENTER, pdf.BLACK);
+        pdf.doc_add(p);
+        
+        font = new com.itextpdf.text.Font(bf, 8, Font.PLAIN);
+        if (nAut > 0) {
+            p = pdf.print("__________ VALOR(ES) LANCADOS __________", pdf.HELVETICA, 7, pdf.NORMAL, pdf.CENTER, pdf.BLACK);
+            pdf.doc_add(p);
+
+            for (int i=0;i<Valores.length;i++) {
+                String bLinha = "";
+                if (!"".equals(Valores[i][1].trim())) {
+                    bLinha = "BCO:" + new Pad(Valores[i][1],3).RPad() + " AG:" + new Pad(Valores[i][2],4).RPad() + " CH:" + new Pad(Valores[i][3],8).RPad() + " DT: " + new Pad(Valores[i][0],10).CPad() + " VR:" + new Pad(Valores[i][4],10).LPad();
+                } else {
+                    bLinha = (Valores[i][5].trim().toUpperCase().equalsIgnoreCase("CT") ? "BC" : Valores[i][5].trim().toUpperCase()) +  ":" + new Pad(LerValor.floatToCurrency(Float.valueOf(Valores[i][4]),2),10).LPad();
+                }
+
+                p = pdf.print(bLinha, pdf.HELVETICA, 6, pdf.NORMAL, pdf.RIGHT, pdf.BLACK);
+                pdf.doc_add(p);
+            }
+
+            p = pdf.print("\n", pdf.HELVETICA, 6, pdf.NORMAL, pdf.LEFT, pdf.BLACK);
+            pdf.doc_add(p);
+
+            l = new LineSeparator();
+            l.setPercentage(100f);
+            p = pdf.print("", pdf.HELVETICA, 7, pdf.BOLDITALIC, pdf.LEFT, pdf.BLACK);
+            p.add(new Chunk(l));
+            pdf.doc_add(p);
+
+            // Imprimir Autenticação
+            p = pdf.print(VariaveisGlobais.dCliente.get("marca").trim() + "RC" + FuncoesGlobais.StrZero(String.valueOf((int)nAut), 7) + "-" +
+                          FuncoesGlobais.StrZero(String.valueOf((int)via), 2) + "/" + FuncoesGlobais.StrZero(String.valueOf((int)nRecibos), 2) + 
+                          Dates.DateFormat("ddMMyyyyHHmmss", new Date()) + FuncoesGlobais.GravaValores(ValorRec.replace(".", ","), 2) + VariaveisGlobais.logado, pdf.HELVETICA, 7, pdf.NORMAL, pdf.CENTER, pdf.BLACK);
+            pdf.doc_add(p);
+            
+            PdfContentByte cb = pdf.writer().getDirectContent();
+            BarcodeInter25 code25 = new BarcodeInter25();
+            String barra = FuncoesGlobais.StrZero(String.valueOf((int)nAut),16);
+            code25.setCode(barra);
+            code25.setChecksumText(true);
+            code25.setFont(null);
+            com.itextpdf.text.Image cdbar = code25.createImageWithBarcode(cb, null, null);
+            cdbar.setAlignment(Element.ALIGN_CENTER);
+            pdf.doc_add(cdbar);            
+        }
+
+        // Pula linhas (6) / corta papel
+        for (int k=1;k<=6;k++) { 
+            p = pdf.print("\n", pdf.HELVETICA, 6, pdf.NORMAL, pdf.LEFT, pdf.BLACK);
+            pdf.doc_add(p);
+        }
+        
+        pdf.close();
+        //pdf.print();
+        new toPrint(pdf.getPathName() + docName, VariaveisGlobais.Recibo.split(",")[0],VariaveisGlobais.Recibo.split(",")[1],VariaveisGlobais.Recibo.split(",")[2]);
+        pdf.setPathName("");
+        pdf.setDocName("");
+   }
+    
     private void rbtDesistiuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rbtDesistiuActionPerformed
         if (clvEspera.getSelectedRow() == -1) {
             return;
@@ -1160,10 +1990,14 @@ public class jRecepcao extends javax.swing.JInternalFrame {
                 } catch (Exception err) {
                     err.printStackTrace();
                 }
+                
+                // Deleta particular
                 dsql = "delete from particular where upper(pa_nome) = '" + clvEspera.getModel().getValueAt(row, 4).toString().trim().toUpperCase() + "' and lower(pa_tipo) = 'consulta'";
                 try {
                     conn.ExecutarComando(dsql);
                 } catch (Exception err) {  err.printStackTrace(); }
+
+                // Auditor
                 conn.Auditor("CONSULTA:DESISTIU:" + dMotivo + ":" + clvEspera.getModel().getValueAt(row, 8).toString().trim(), clvEspera.getModel().getValueAt(row, 4).toString().trim());
 
                 // Extorna caixa
@@ -1171,6 +2005,7 @@ public class jRecepcao extends javax.swing.JInternalFrame {
                 try {
                     if (!naut.trim().equalsIgnoreCase("")) conn.ExecutarComando("UPDATE ncaixa SET oper = 'RECX' WHERE autenticacao = '" + naut + "';");
                     if (!naut.trim().equalsIgnoreCase("")) conn.ExecutarComando("DELETE FROM nparticular WHERE aut = '" + naut + "';");
+                    if (!naut.trim().equalsIgnoreCase("")) conn.ExecutarComando("DELETE FROM convtaxas WHERE ct_aut = '" + naut + "';");
                 } catch (Exception e) {}
 
                 TableControl.del(clvEspera, row);
@@ -1208,7 +2043,30 @@ public class jRecepcao extends javax.swing.JInternalFrame {
             Object[] options = { "Sim", "Naoo" };
             int n = JOptionPane.showOptionDialog(null, "Deseja dar saida deste paciente ? ", "Atencao", 0, 3, null, options, options[0]);
             if (n == 0) {
-                String dsql = "insert into faturar select * from marcar where Lower(ma_origem) = '" + torigem.toLowerCase() + "' AND ma_data = '" + tdata + "' AND ma_codmedico = " + tcdmedico + " AND ma_status = 4 AND ma_pcnumero = " + cdpac;
+                String[][] dadospac = new String[0][];
+                try {
+                    dadospac = conn.LerCamposTabela(new String[] { "pc_convnumero", "pc_convenio", "pc_inscricao", "pc_nome" }, "pacientes", "pc_numero = '" + cdpac + "'");
+                } catch (Exception err) {}
+                
+                String dsql = "";
+                String guia = "";
+                if (!dadospac[1][3].trim().toUpperCase().equalsIgnoreCase("PARTICULAR")) {   
+                    while (guia.isEmpty()) {
+                        guia = JOptionPane.showInputDialog("Digite o número da guia:");
+                        if (guia == null) guia = "";
+                    }
+                            
+                } else {
+                    guia = "";
+                }
+
+                dsql = "INSERT INTO faturar SELECT ma_data, ma_hora, ma_horasai, ma_medico, ma_indicado, ma_categoria, " +
+                       "ma_nome, ma_consulta, ma_revisao, ma_procedimento, ma_medicamento, " +
+                       "ma_status, ma_plano, ma_inscricao, ma_origem, ma_convnumero, " +
+                       "ma_pcnumero, ma_cortesia, '" + guia + "', cv_numerador, ma_codmedico, " +
+                       "autenticacao, cv_consultavr, cv_medicovr FROM marcar " +
+                       "where Lower(ma_origem) = '" + torigem.toLowerCase() + "' AND ma_data = '" + tdata + "' AND ma_codmedico = " + tcdmedico + " AND ma_status = 4 AND ma_pcnumero = " + cdpac;
+
                 try {
                     conn.ExecutarComando(dsql);
                 } catch (Exception err) {}
@@ -1263,7 +2121,15 @@ public class jRecepcao extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_clvMedicosMouseReleased
 
     private void clvMedicosKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_clvMedicosKeyReleased
-        FiltraEspera();
+        if (evt.getKeyCode() == KeyEvent.VK_A) {
+            int selRow = clvMedicos.getSelectedRow();
+            int modelRow = clvMedicos.convertRowIndexToModel(selRow);
+            String tcdmed = clvMedicos.getModel().getValueAt(modelRow, 0).toString().toUpperCase().trim();
+            if (!tcdmed.equalsIgnoreCase("TODOS")) {                                  
+                ChamaAgenda(tcdmed);
+            }
+        } else FiltraEspera();
+        
     }//GEN-LAST:event_clvMedicosKeyReleased
 
     private void clvSeekMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_clvSeekMouseReleased
@@ -1330,7 +2196,7 @@ public class jRecepcao extends javax.swing.JInternalFrame {
         String[][] cab = { { "origem", "ficha", "inscricao", "nome", "dias" }, { "100", "80", "200", "400", "50" } };
         TableControl.header(clvPacientes, cab);
 
-        final SwingWorker w = new SwingWorker() {
+        w = new SwingWorker() {
             @Override
             protected Object doInBackground() throws Exception {
                 btnBuscar.setEnabled(false);
@@ -1340,6 +2206,8 @@ public class jRecepcao extends javax.swing.JInternalFrame {
                 int n = 0;
                 try {
                     while (rs.next()) {
+                        if (isCancelled()) break;
+                        
                         int pos = n * 100 / tam;
                         pbBuscar.setValue(pos);
                         pbBuscar.repaint();
@@ -1378,12 +2246,17 @@ public class jRecepcao extends javax.swing.JInternalFrame {
                 btnBuscar.setEnabled(true);
                 return 0;
             }
+            
+//            @Override
+//            protected void done() {
+//                
+//            }
         };
         w.execute();
     }
 
     private void initencerrados() {
-        String sql = "select m.ma_medico, p.pc_nome, m.ma_hora, m.ma_horasai from faturar as m, pacientes as p where (m.ma_pcnumero = p.pc_numero) AND (ma_data >= '" + Dates.DateFormat("dd-MM-yyyy", new Date()) + "') and lower(ma_origem) = '" + VariaveisGlobais.origem.toLowerCase().trim() + "' and ma_status = 4 and (ma_consulta = 1 or ma_revisao = 1 " + "or ma_cortesia = 1 or ma_procedimento = 1) order by Lower(p.pc_nome);";
+        String sql = "select m.ma_medico, p.pc_nome, m.ma_hora, m.ma_horasai from faturar as m, pacientes as p where (m.ma_pcnumero = p.pc_numero) AND (ma_data = '" + Dates.DateFormat("dd-MM-yyyy", new Date()) + "') and lower(ma_origem) = '" + VariaveisGlobais.origem.toLowerCase().trim() + "' and ma_status = 4 and (ma_consulta = 1 or ma_revisao = 1 " + "or ma_cortesia = 1 or ma_procedimento = 1) order by Lower(p.pc_nome);";
 
         ResultSet ers = conn.AbrirTabela(sql, 1007);
         try {
@@ -1582,8 +2455,7 @@ public class jRecepcao extends javax.swing.JInternalFrame {
     jTooTips.setText(tooltext);
   }
   
-  private void FiltraEspera()
-  {
+  private void FiltraEspera() {
     int selRow = clvMedicos.getSelectedRow();
     int modelRow = clvMedicos.convertRowIndexToModel(selRow);
     String tcdmed = clvMedicos.getModel().getValueAt(modelRow, 0).toString().toUpperCase().trim();
@@ -1955,7 +2827,7 @@ public class jRecepcao extends javax.swing.JInternalFrame {
     private String user = "";
     private String type = "";
     private int portNumber = 2222;
-    private String host = "localhost";
+    private String host = VariaveisGlobais.unidade;
     
     MultiThreadChatClient() {}
     
@@ -2205,8 +3077,7 @@ public class jRecepcao extends javax.swing.JInternalFrame {
     clvEspera.setRowSorter(sorter3);
   }
   
-  private void Desistiu(String cdpac)
-  {
+  private void Desistiu(String cdpac) {
     int row = TableControl.seek(clvEspera, 2, cdpac);
     
     TableControl.del(clvEspera, row);
@@ -2217,8 +3088,7 @@ public class jRecepcao extends javax.swing.JInternalFrame {
     }
   }
   
-  private void Saida(String cdpac)
-  {
+  private void Saida(String cdpac) {
     int mRow = TableControl.seek(clvEspera, 2, cdpac);
     
     TableControl.del(clvEspera, mRow);
@@ -2303,3 +3173,5 @@ public class jRecepcao extends javax.swing.JInternalFrame {
   }
 
 }
+
+// Pagamento ao médico, xxxxxxxxxxxxxxxxxxx, referente aos atendimentos do dia xx/xx/xxxx no valor de R$ xx,xx

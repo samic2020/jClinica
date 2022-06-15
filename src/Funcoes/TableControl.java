@@ -93,7 +93,6 @@ public class TableControl {
              
         };
 
-        //table.setModel(new javax.swing.table.DefaultTableModel(new Object [][] { }, aheader[0]){});
         table.setModel(tableModel);
         for (int i=0;i <= (aheader[1].length - 1); i++) {
             table.getColumnModel().getColumn(i).setPreferredWidth(Integer.parseInt(aheader[1][i]));
@@ -113,6 +112,40 @@ public class TableControl {
     }
 
     public static void add(JTable table, String itens[][], boolean zebra){
+        javax.swing.table.DefaultTableModel dtm =
+        (javax.swing.table.DefaultTableModel)table.getModel();
+        //lembre-se um "" para cada coluna na tabela
+        dtm.addRow(itens[0]);
+
+        if (zebra) {
+            UIManager.put("Table.alternateRowColor", new Color(204,204,255));
+            UIManager.put("Table.foreground", new Color(0, 0, 0));
+            UIManager.put("Table.selectionBackground", Color.YELLOW);
+            UIManager.put("Table.selectionForeground", Color.RED);
+        }
+
+        if (itens[1].length > 0) {
+            DefaultTableCellRenderer esquerda = new DefaultTableCellRenderer();
+            DefaultTableCellRenderer centralizado = new DefaultTableCellRenderer();
+            DefaultTableCellRenderer direita = new DefaultTableCellRenderer();
+
+            esquerda.setHorizontalAlignment(SwingConstants.LEFT);
+            centralizado.setHorizontalAlignment(SwingConstants.CENTER);
+            direita.setHorizontalAlignment(SwingConstants.RIGHT);
+           //DefaultTableCellRenderer alinha = new DefaultTableCellRenderer();
+           for (int i=0; i <= itens[1].length - 1; i++) {
+               if (itens[1][i].equals("L")) {
+                   table.getColumnModel().getColumn(i).setCellRenderer(esquerda);
+               } else if (itens[1][i].equals("C")) {
+                   table.getColumnModel().getColumn(i).setCellRenderer(centralizado);
+               } else if (itens[1][i].equals("R")) {
+                   table.getColumnModel().getColumn(i).setCellRenderer(direita);
+               }               
+           }
+        }
+    }
+
+    public static void add(JTable table, Object[][] itens, boolean zebra){
         javax.swing.table.DefaultTableModel dtm =
         (javax.swing.table.DefaultTableModel)table.getModel();
         //lembre-se um "" para cada coluna na tabela
@@ -192,6 +225,25 @@ public class TableControl {
         return retorno;
     }
 
+    public static int seek(JTable table, int coluna, String buscar, int tpbusca) {
+        int retorno = -1;
+        for (int i=0;i<table.getRowCount();i++) {
+            String vrTable = ((String) table.getValueAt(i, coluna));
+            if (tpbusca == 0) {
+                if (vrTable.contains(buscar)) {
+                    retorno = i;
+                    break;
+                }
+            } else {
+                if (vrTable.equalsIgnoreCase(buscar)) {
+                    retorno = i;
+                    break;
+                }
+            }
+        }
+        return retorno;
+    }
+    
     public static boolean  del(JTable table, int row) {
         boolean retorno = false;
         if (row > table.getRowCount()) retorno = false; else retorno = true;

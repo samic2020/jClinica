@@ -38,8 +38,8 @@ public class jUsuarios extends javax.swing.JInternalFrame {
         conj.add(AWTKeyStroke.getAWTKeyStroke(KeyEvent.VK_ENTER, 0));
         this.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, conj);
         
-        setSize(788, 281);
-        pnlogin.setSize(333, 55);
+        setSize(736,228);
+        pnlogin.setSize(277, 43);
         // ler primeiro geristro
         try {
             boolean next = urs.next();
@@ -110,9 +110,12 @@ public class jUsuarios extends javax.swing.JInternalFrame {
         jLabel6 = new javax.swing.JLabel();
         mSenha = new LimitedTextField(10);
 
-        setClosable(true);
-        setIconifiable(true);
+        setBackground(new java.awt.Color(101, 227, 255));
         setTitle(".:: Cadastro de Usuário");
+        setMaximumSize(new java.awt.Dimension(736, 228));
+        setMinimumSize(new java.awt.Dimension(736, 228));
+        setOpaque(true);
+        setPreferredSize(new java.awt.Dimension(736, 228));
         setVisible(true);
 
         lblNome.setText("Nome:");
@@ -153,7 +156,7 @@ public class jUsuarios extends javax.swing.JInternalFrame {
 
         mEndereco.setText("jTextField1");
 
-        jLabel10.setText("Bai.:");
+        jLabel10.setText("Bairro:");
 
         mBairro.setText("jTextField1");
 
@@ -187,6 +190,7 @@ public class jUsuarios extends javax.swing.JInternalFrame {
 
         mContato.setText("jTextField1");
 
+        jPanel1.setBackground(new java.awt.Color(101, 227, 255));
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("[ Opções ]"));
 
         btIncluir.setText("Incluir");
@@ -255,7 +259,10 @@ public class jUsuarios extends javax.swing.JInternalFrame {
 
         mEspecialidade.setText("jTextField1");
 
+        pnlogin.setBackground(new java.awt.Color(101, 227, 255));
         pnlogin.setBorder(javax.swing.BorderFactory.createTitledBorder("[ Login ]"));
+        pnlogin.setMaximumSize(new java.awt.Dimension(277, 43));
+        pnlogin.setMinimumSize(new java.awt.Dimension(277, 43));
 
         jLabel5.setText("Login:");
 
@@ -297,9 +304,9 @@ public class jUsuarios extends javax.swing.JInternalFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(pnlogin, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(pnlogin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
@@ -312,16 +319,16 @@ public class jUsuarios extends javax.swing.JInternalFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(mBairro, javax.swing.GroupLayout.PREFERRED_SIZE, 206, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
+                                .addComponent(mBairro, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(jLabel11)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(mCidade, javax.swing.GroupLayout.PREFERRED_SIZE, 195, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(jLabel12)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(mEstado, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(jLabel13)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(mCep, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -332,10 +339,10 @@ public class jUsuarios extends javax.swing.JInternalFrame {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(mContato))
                             .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                                     .addGroup(layout.createSequentialGroup()
                                         .addComponent(mCpf, javax.swing.GroupLayout.PREFERRED_SIZE, 168, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                         .addComponent(jLabel4)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                         .addComponent(mIdentidade, javax.swing.GroupLayout.PREFERRED_SIZE, 204, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -347,7 +354,7 @@ public class jUsuarios extends javax.swing.JInternalFrame {
                                         .addGap(22, 22, 22)
                                         .addComponent(mFuncao, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                                     .addGroup(layout.createSequentialGroup()
-                                        .addGap(0, 0, Short.MAX_VALUE)
+                                        .addGap(0, 33, Short.MAX_VALUE)
                                         .addComponent(lbCTPS_CRM)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                         .addComponent(mCTPS_CRM, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -356,8 +363,8 @@ public class jUsuarios extends javax.swing.JInternalFrame {
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                         .addComponent(mUfCRM, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE))))
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addComponent(mEspecialidade)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(mEspecialidade, javax.swing.GroupLayout.PREFERRED_SIZE, 193, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(jLabel9)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(mEndereco, javax.swing.GroupLayout.PREFERRED_SIZE, 394, javax.swing.GroupLayout.PREFERRED_SIZE)))))
@@ -673,55 +680,57 @@ public class jUsuarios extends javax.swing.JInternalFrame {
                 stm.execute();
                 stm.close();
                 
-                // tabela do médico
-                try {
-                    tcdmed = conn.LerParametros("codmed");
-                    conn.GravarParametros(new String[] {"codmed", String.valueOf(Integer.valueOf(tcdmed) + 1).replaceAll(".0", ""), "NUMERICO"});
-                } catch (Exception e) {}
+                if (tfuncao.trim().toLowerCase().equalsIgnoreCase("medico")) {
+                    // tabela do médico
+                    try {
+                        tcdmed = conn.LerParametros("codmed");
+                        conn.GravarParametros(new String[] {"codmed", String.valueOf(Integer.valueOf(tcdmed) + 1).replaceAll(".0", ""), "NUMERICO"});
+                    } catch (Exception e) {}
 
-                sql = "INSERT INTO medicos( " +
-                      "md_codigo, md_nome, md_categoria, md_cpf, md_identidade, md_crm, md_crmuf, " +
-                      "md_endereco, md_bairro, md_cidade, md_estado, md_cep, md_telefone) " +
-                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+                    sql = "INSERT INTO medicos( " +
+                          "md_codigo, md_nome, md_categoria, md_cpf, md_identidade, md_crm, md_crmuf, " +
+                          "md_endereco, md_bairro, md_cidade, md_estado, md_cep, md_telefone) " +
+                          "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
                     
-                stm = conn.conn.prepareStatement(sql);
-                // coloca os campos
-                stm.setInt(1, Integer.valueOf(tcdmed) + 1);
-                stm.setString(2, tnome);
-                stm.setString(3, tespecialidade);
-                stm.setString(4, tcpf);
-                stm.setString(5, trg);
-                stm.setString(6, tctps);
-                stm.setString(7, tcrmuf);
-                stm.setString(8, tendereco);
-                stm.setString(9, tbairro);
-                stm.setString(10, tcidade);
-                stm.setString(11, testado);
-                stm.setString(12, tcep);
-                stm.setString(13, ttelefone);
-                stm.execute();
-                stm.close();
-                
-                // tabela do médconv
-                sql = "INSERT INTO medconv( " +
-                      "mc_crm, mc_plano, mc_segunda, mc_terca, mc_quarta, " +
-                      "mc_quinta, mc_sexta, mc_sabado, mc_domingo, mc_medcod) " +
-                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-                    
-                stm = conn.conn.prepareStatement(sql);
-                // coloca os campos
-                stm.setString(1, tctps);
-                stm.setString(2, "PARTICULAR");
-                stm.setInt(3, 1);
-                stm.setInt(4, 1);
-                stm.setInt(5, 1);
-                stm.setInt(6, 1);
-                stm.setInt(7, 1);
-                stm.setInt(8, 1);
-                stm.setInt(9, 1);
-                stm.setInt(10, Integer.valueOf(tcdmed));
-                stm.execute();
-                stm.close();                
+                    stm = conn.conn.prepareStatement(sql);
+                    // coloca os campos
+                    stm.setInt(1, Integer.valueOf(tcdmed) + 1);
+                    stm.setString(2, tnome);
+                    stm.setString(3, tespecialidade);
+                    stm.setString(4, tcpf);
+                    stm.setString(5, trg);
+                    stm.setString(6, tctps);
+                    stm.setString(7, tcrmuf);
+                    stm.setString(8, tendereco);
+                    stm.setString(9, tbairro);
+                    stm.setString(10, tcidade);
+                    stm.setString(11, testado);
+                    stm.setString(12, tcep);
+                    stm.setString(13, ttelefone);
+                    stm.execute();
+                    stm.close();
+
+                    // tabela do médconv
+                    sql = "INSERT INTO medconv( " +
+                          "mc_crm, mc_plano, mc_segunda, mc_terca, mc_quarta, " +
+                          "mc_quinta, mc_sexta, mc_sabado, mc_domingo, mc_medcod) " +
+                          "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+
+                    stm = conn.conn.prepareStatement(sql);
+                    // coloca os campos
+                    stm.setString(1, tctps);
+                    stm.setString(2, "PARTICULAR");
+                    stm.setInt(3, 1);
+                    stm.setInt(4, 1);
+                    stm.setInt(5, 1);
+                    stm.setInt(6, 1);
+                    stm.setInt(7, 1);
+                    stm.setInt(8, 1);
+                    stm.setInt(9, 1);
+                    stm.setInt(10, Integer.valueOf(tcdmed));
+                    stm.execute();
+                    stm.close();                
+                }
             } catch (Exception err) {err.printStackTrace();}
         } else {
             try {

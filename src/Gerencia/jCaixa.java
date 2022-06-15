@@ -6,10 +6,19 @@
 package Gerencia;
 
 import Db.DbMain;
+import Funcoes.Collections;
 import Funcoes.Dates;
+import Funcoes.FuncoesGlobais;
+import Funcoes.JavaPOS;
+import Funcoes.LerValor;
+import Funcoes.Pad;
+import Funcoes.PrinterPOS;
 import Funcoes.VariaveisGlobais;
 import Funcoes.toPrint;
 import java.math.BigDecimal;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -63,9 +72,11 @@ public class jCaixa extends javax.swing.JInternalFrame {
         jLabel4 = new javax.swing.JLabel();
         jDTcx = new javax.swing.JTextField();
 
+        setBackground(new java.awt.Color(101, 227, 255));
         setClosable(true);
         setIconifiable(true);
         setTitle(".:: Fechamento do Caixa");
+        setOpaque(true);
         setVisible(true);
 
         jLabel1.setText("Dinheiro:");
@@ -154,12 +165,15 @@ public class jCaixa extends javax.swing.JInternalFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jbtFecharActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtFecharActionPerformed
+        //Fechar(Dates.StringtoDate(jDTcx.getText(), "dd/MM/yyyy"));
+
         Map parametros = new HashMap();
         parametros.put("data", cxdata == null ? new Date() : cxdata);
         parametros.put("logado", Integer.valueOf(VariaveisGlobais.cdlogado));
         parametros.put("ap_cx_dn", new BigDecimal(jDN.getText().replace(".", "").replace(",", ".")));
         parametros.put("ap_cx_ch", new BigDecimal(jCH.getText().replace(".", "").replace(",", ".")));
         parametros.put("ap_cx_ct", Integer.valueOf(jCT.getValue().toString()));
+        parametros.put("SUBREPORT_DIR", "reports/");
 
         try {
             String fileName = "reports/nCaixas.jasper";
@@ -182,9 +196,13 @@ public class jCaixa extends javax.swing.JInternalFrame {
                 isprint = JOptionPane.showConfirmDialog(this, "Imprimiu corretamente?", "Impressão", YES_NO_OPTION) == YES_OPTION ? true : false;
             }
             try {
-                conn.ExecutarComando("DELETE FROM ncaixa WHERE f_cod = " + VariaveisGlobais.cdlogado + ";");
+                //conn.ExecutarComando("DELETE FROM ncaixa WHERE f_cod = " + VariaveisGlobais.cdlogado + ";");
             } catch (Exception e) {}
             
+            String sExecuteSql = "";
+            //* Deleta o caixa
+            sExecuteSql = FuncoesGlobais.Subst("DELETE FROM ncaixa WHERE data <= '&1.';", new String[] {Dates.DateFormat("yyyy-MM-dd", cxdata)});
+            conn.ExecutarComando(sExecuteSql);
         } catch (JRException e) {
             e.printStackTrace();
             System.exit(1);
@@ -192,9 +210,1661 @@ public class jCaixa extends javax.swing.JInternalFrame {
             e.printStackTrace();
             System.exit(1);
         }        
+        dispose();
     }//GEN-LAST:event_jbtFecharActionPerformed
 
+    private void Fechar(Date dData) {
+        Collections gVar = VariaveisGlobais.dCliente;
+        ResultSet rs;
+        //String sql = "SELECT * FROM caixa WHERE Lower(cx_logado) = 'fabiana' AND data = '2011-06-22' ORDER BY Lower(cx_logado), oper, tipo, autenticacao, oper desc;";
+        final String sql = "SELECT * FROM ncaixa WHERE data = '&1.' AND tipo = '&2.' AND (oper = '&3.' OR oper = '&3.X') ORDER BY autenticacao, toper desc;";
+        //"SELECT * FROM caixabck WHERE Lower(cx_logado) = 'fabiana' AND data = '2010-08-11' AND tipo = 'CRE' AND oper LIKE 'AV%' ORDER BY autenticacao, oper desc;"
+        String sSql = "";
 
+        float tt_apu_dn = 0;
+        float tt_apu_ch = 0;
+        float tt_apu_cp = 0;
+        float m_Saldo = 0;
+
+        String docName = "reports/Recibos/" + "CX_" + Dates.DateFormat("ddMMyyyy", dData) + "_" + Dates.DateFormat("HHmmss", dData) + "_" + VariaveisGlobais.logado.trim().toLowerCase();
+        PrinterPOS printer = new PrinterPOS(docName);
+        printer.Print(JavaPOS.ESC_ARROBA + "", 1);
+        //printer.setDocName(docName);
+
+        // Imprime logomarca
+        ///////printer.PrintBitMap("resources/logos/boleta/" + VariaveisGlobais.dCliente.get("marca").trim() + ".gif",0);
+        /////////printer.Print("", 1);
+
+        // cabeçário
+        printer.Print(JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_E(1) + gVar.get("empresa"), 1);
+        printer.Print(JavaPOS.ESCLAMATION(65) + gVar.get("endereco") + ", " + gVar.get("numero") + " " + gVar.get("complemento"), 1);
+        printer.Print(JavaPOS.ESCLAMATION(65) + gVar.get("bairro") + " - " + gVar.get("cidade") + " - " + gVar.get("estado") + " - " + gVar.get("cep"), 1);
+        printer.Print(JavaPOS.ESCLAMATION(65) + "Tel:" + gVar.get("telefone") + JavaPOS.ESC_E(0), 1);
+        printer.Print("", 1);
+
+        printer.Print(JavaPOS.ESCLAMATION(70) + JavaPOS.ESC_A(1) + JavaPOS.REVERSO + "FECHAMENTO DE CAIXA" + JavaPOS.NORMAL, 1);
+        printer.Print(JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(0) + "", 1);
+
+        printer.Print(JavaPOS.ESCLAMATION(65) + "CAIXA DO DIA => " + JavaPOS.ESC_E(1) + Dates.DateFormat("dd/MM/yyyy", dData) + JavaPOS.ESC_E(0),1);
+        printer.Print(JavaPOS.ESCLAMATION(65) + "CAIXA: " + new Pad(VariaveisGlobais.logado,15).RPad() + "       Data/Hora: " + Dates.DateFormat("dd/MM/yyyy HH:mm", new Date()) ,1);
+
+        printer.Print(JavaPOS.ESCLAMATION(65) + "========================================================",1);
+
+        // RECIBOS
+        sSql = FuncoesGlobais.Subst(sql, new String[] {
+             Dates.DateFormat("yyyy-MM-dd", dData),
+             "CRE", "REC"});
+        rs = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+
+        int tam = DbMain.RecordCount(rs);
+        if (tam > 0) {printer.Print(
+                JavaPOS.ESCLAMATION(65) + JavaPOS.GS_EXC(16) + "RECIBOS" + JavaPOS.GS_EXC(0),1);
+                printer.Print(JavaPOS.ESCLAMATION(65) + "--------------------------------------------------------",1);
+        }
+        String[] linhas = {};
+        float tdoc = 0;
+        try {
+          String oldCx = "";
+          while (rs.next()) {
+              if (!oldCx.equals(rs.getString("autenticacao"))) {
+                if (tdoc > 0) {
+                    linhas[0] += "         " + JavaPOS.ESC_E(1) +
+                                 new Pad(LerValor.floatToCurrency(tdoc, 2),14).LPad() +
+                                 JavaPOS.ESC_E(0);
+                    // imprimi
+                    for (int i=0;i<linhas.length;i++) {printer.Print(JavaPOS.ESCLAMATION(65) + linhas[i], 1);}
+                    tdoc = 0;  linhas = new String[] {};
+                }
+                linhas = FuncoesGlobais.ArrayAdd(linhas, JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(0) + JavaPOS.ESC_E(1) +
+                        JavaPOS.ESC_R(1) + new Pad(rs.getString("autenticacao"),6).RPad() +
+                        JavaPOS.ESC_R(0) +
+                        (!rs.getString("bco").equalsIgnoreCase("") ? JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_E(0) + "  " +
+                        JavaPOS.ESCLAMATION(65) + "        " +
+                        JavaPOS.ESCLAMATION(65) + "  " +
+                        JavaPOS.ESCLAMATION(65) + rs.getString("pc_numero") +
+                        JavaPOS.ESCLAMATION(65) : "                ") + JavaPOS.ESC_E(1) + (rs.getString("oper").contains("X") ? " EXTORNO" : "        ") + JavaPOS.ESC_E(0));
+
+                oldCx = rs.getString("autenticacao");
+              }
+
+              String cdpac = rs.getString("pc_numero");
+              Object[][] dadospac = null;
+              try {
+                dadospac = conn.LerCamposTabela(new String[] {"pc_nome"}, "pacientes", "pc_numero = ?", new Object[][] {{"int", Integer.valueOf(cdpac)}});
+              } catch (Exception e) {}
+              linhas = FuncoesGlobais.ArrayAdd(linhas, JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(0) + "       " +
+                      JavaPOS.ESCLAMATION(65) +
+               new Pad(dadospac[0][3].toString().trim(),70).LPad() +
+                      " " + rs.getString("toper").replaceAll("CT", "BC"));
+              
+              String dta = Dates.DateFormat("dd/MM/yyyy", rs.getDate("data"));
+              String bco = "", age = "", nch = "", vrl = "";              
+              if (!rs.getString("toper").toLowerCase().trim().equalsIgnoreCase("DN")) {
+                  bco = rs.getString("bco");
+                  age = rs.getString("agencia");
+                  nch = rs.getString("ncheque");
+                  vrl = new DecimalFormat("#,###.00").format(rs.getBigDecimal("valor"));
+              } else {
+                  vrl = new DecimalFormat("#,###.00").format(rs.getBigDecimal("valor"));
+              }
+
+//              linhas = FuncoesGlobais.ArrayAdd(linhas, JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(0) + "       " +
+//                      JavaPOS.ESCLAMATION(65) +
+//               dta + " " + bco + " " + age + " " + nch + " " + new Pad(vrl,14).LPad() +
+//                      " " + rs.getString("toper").replaceAll("CT", "BC"));
+
+              tdoc += LerValor.StringToFloat(vrl);
+          }
+        } catch (SQLException ex) {ex.printStackTrace();}
+        DbMain.FecharTabela(rs);
+
+        // Finaliza impressao
+        if (tdoc > 0) {
+            linhas[0] += "         " + JavaPOS.ESC_E(1) +
+                         new Pad(LerValor.floatToCurrency(tdoc, 2),14).LPad() +
+                         JavaPOS.ESC_E(0);
+            // imprimi
+            for (int i=0;i<linhas.length;i++) {printer.Print(linhas[i], 1);}
+            tdoc = 0;  linhas = new String[] {};
+        }
+
+        // ADIANTAMENTO
+        sSql = FuncoesGlobais.Subst(sql, new String[] {
+             Dates.DateFormat("yyyy-MM-dd", dData),
+             "DEB", "ADI"});
+        rs = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+
+        tam = DbMain.RecordCount(rs);
+        if (tam > 0) {printer.Print(
+                JavaPOS.ESCLAMATION(65) + JavaPOS.GS_EXC(16) + "ADIANTAMENTOS - DEBITO" + JavaPOS.GS_EXC(0),1);
+                printer.Print(JavaPOS.ESCLAMATION(65) + "--------------------------------------------------------",1);
+        }
+        linhas = new String[] {};
+        tdoc = 0;
+        try {
+          String oldCx = "";
+          while (rs.next()) {
+              if (!oldCx.equals(rs.getString("autenticacao"))) {
+                if (tdoc > 0) {
+                    linhas[0] += "         " + JavaPOS.ESC_E(1) +
+                                 new Pad(LerValor.floatToCurrency(tdoc, 2),14).LPad() +
+                                 JavaPOS.ESC_E(0);
+                    // imprimi
+                    for (int i=0;i<linhas.length;i++) {printer.Print(linhas[i], 1);}
+                    tdoc = 0;  linhas = new String[] {};
+                }
+                linhas = FuncoesGlobais.ArrayAdd(linhas, JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(0) + JavaPOS.ESC_E(1) +
+                        JavaPOS.ESC_R(1) + new Pad(rs.getString("autenticacao"),6).RPad() +
+                        JavaPOS.ESC_R(0) +
+                        JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_E(0) + "  " +
+                        JavaPOS.ESCLAMATION(65) + "00:00:00" +
+                        JavaPOS.ESCLAMATION(65) + "  " +
+                        //javaPOS.ESCLAMATION(65) + new Pad(rs.getString("pc_numero"),5).LPad() + (20-12-2011 17h06m
+                        JavaPOS.ESCLAMATION(65) + rs.getString("pc_numero") +
+                        JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_E(1) + (rs.getString("oper").contains("X") ? " EXTORNO" : "        ") + JavaPOS.ESC_E(0));
+
+                oldCx = rs.getString("autenticacao");
+              }
+
+              String dta = Dates.DateFormat("dd/MM/yyyy", rs.getDate("data"));
+              String bco = "", age = "", nch = "", vrl = "";              
+              if (!rs.getString("toper").toLowerCase().trim().equalsIgnoreCase("DN")) {
+                  bco = rs.getString("bco");
+                  age = rs.getString("agencia");
+                  nch = rs.getString("ncheque");
+                  vrl = new DecimalFormat("#,###.00").format(rs.getBigDecimal("valor"));
+              }
+
+              linhas = FuncoesGlobais.ArrayAdd(linhas, JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(0) + "       " +
+                      JavaPOS.ESCLAMATION(65) +
+               dta + " " + bco + " " + age + " " + nch + " " + new Pad(vrl,14).LPad() +
+                      " " + rs.getString("oper").replaceAll("CT", "BC"));
+
+              tdoc += LerValor.StringToFloat(vrl);
+          }
+        } catch (SQLException ex) {ex.printStackTrace();}
+        DbMain.FecharTabela(rs);
+
+        // Finaliza impressao
+        if (tdoc > 0) {
+            linhas[0] += "         " + JavaPOS.ESC_E(1) +
+                         new Pad(LerValor.floatToCurrency(tdoc, 2),14).LPad() +
+                         JavaPOS.ESC_E(0);
+            // imprimi
+            for (int i=0;i<linhas.length;i++) {printer.Print(JavaPOS.ESCLAMATION(65) + linhas[i], 1);}
+            tdoc = 0;  linhas = new String[] {};
+        }
+
+        // EXTRATO
+        sSql = FuncoesGlobais.Subst(sql, new String[] {
+             Dates.DateFormat("yyyy-MM-dd", dData),
+             "DEB", "EXT"});
+        rs = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+
+        tam = DbMain.RecordCount(rs);
+        if (tam > 0) {printer.Print(
+                JavaPOS.ESCLAMATION(65) + JavaPOS.GS_EXC(16) + "EXTRATOS" + JavaPOS.GS_EXC(0),1);
+                printer.Print(JavaPOS.ESCLAMATION(65) + "--------------------------------------------------------",1);
+        }
+        linhas = new String[] {};
+        tdoc = 0;
+        try {
+          String oldCx = "";
+          while (rs.next()) {
+              if (!oldCx.equals(rs.getString("autenticacao"))) {
+                if (tdoc > 0) {
+                    linhas[0] += "         " + JavaPOS.ESC_E(1) +
+                                 new Pad(LerValor.floatToCurrency(tdoc, 2),14).LPad() +
+                                 JavaPOS.ESC_E(0);
+                    // imprimi
+                    for (int i=0;i<linhas.length;i++) {printer.Print(linhas[i], 1);}
+                    tdoc = 0;  linhas = new String[] {};
+                }
+                linhas = FuncoesGlobais.ArrayAdd(linhas, JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(0) + JavaPOS.ESC_E(1) +
+                        JavaPOS.ESC_R(1) + new Pad(rs.getString("autenticacao"),6).RPad() +
+                        JavaPOS.ESC_R(0) +
+                        JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_E(0) + "  " +
+                        JavaPOS.ESCLAMATION(65) + "00:00:00" +
+                        JavaPOS.ESCLAMATION(65) + "  " +
+                        //javaPOS.ESCLAMATION(65) + new Pad(rs.getString("pc_numero"),5).LPad() + (20-12-2011 17h06m
+                        JavaPOS.ESCLAMATION(65) + rs.getString("pc_numero") +
+                        JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_E(1) + (rs.getString("oper").contains("X") ? " EXTORNO" : "        ") + JavaPOS.ESC_E(0));
+
+                oldCx = rs.getString("autenticacao");
+              }
+
+              String dta = Dates.DateFormat("dd/MM/yyyy", rs.getDate("data"));
+              String bco = "", age = "", nch = "", vrl = "";              
+              if (!rs.getString("toper").toLowerCase().trim().equalsIgnoreCase("DN")) {
+                  bco = rs.getString("bco");
+                  age = rs.getString("agencia");
+                  nch = rs.getString("ncheque");
+                  vrl = new DecimalFormat("#,###.00").format(rs.getBigDecimal("valor"));
+              }
+
+              linhas = FuncoesGlobais.ArrayAdd(linhas, JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(0) + "       " +
+                      JavaPOS.ESCLAMATION(65) +
+               dta + " " + bco + " " + age + " " + nch + " " + new Pad(vrl,14).LPad() +
+                      " " + rs.getString("oper").replaceAll("CT", "BC"));
+
+              tdoc += LerValor.StringToFloat(vrl);
+          }
+        } catch (SQLException ex) {ex.printStackTrace();}
+        DbMain.FecharTabela(rs);
+
+        // Finaliza impressao
+        if (tdoc > 0) {
+            linhas[0] += "         " + JavaPOS.ESC_E(1) +
+                         new Pad(LerValor.floatToCurrency(tdoc, 2),14).LPad() +
+                         JavaPOS.ESC_E(0);
+            // imprimi
+            for (int i=0;i<linhas.length;i++) {printer.Print(linhas[i], 1);}
+            tdoc = 0;  linhas = new String[] {};
+        }
+
+        // AVISO DE CREDITO
+        sSql = FuncoesGlobais.Subst(sql, new String[] {
+             Dates.DateFormat("yyyy-MM-dd", dData),
+             "CRE", "AVI"});
+        rs = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+
+        tam = DbMain.RecordCount(rs);
+        if (tam > 0) {printer.Print(
+                JavaPOS.ESCLAMATION(65) + JavaPOS.GS_EXC(16) + "AVISOS - CREDITOS" + JavaPOS.GS_EXC(0),1);
+                printer.Print(JavaPOS.ESCLAMATION(65) + "--------------------------------------------------------",1);
+        }
+        linhas = new String[] {};
+        tdoc = 0;
+        try {
+          String oldCx = "";
+          while (rs.next()) {
+              if (!oldCx.equals(rs.getString("autenticacao"))) {
+                if (tdoc > 0) {
+                    linhas[0] += "         " + JavaPOS.ESC_E(1) +
+                                 new Pad(LerValor.floatToCurrency(tdoc, 2),14).LPad() +
+                                 JavaPOS.ESC_E(0);
+                    // imprimi
+                    for (int i=0;i<linhas.length;i++) {printer.Print(JavaPOS.ESCLAMATION(65) + linhas[i], 1);}
+                    tdoc = 0;  linhas = new String[] {};
+                }
+                linhas = FuncoesGlobais.ArrayAdd(linhas, JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(0) + JavaPOS.ESC_E(1) +
+                        JavaPOS.ESC_R(1) + new Pad(rs.getString("autenticacao"),6).RPad() +
+                        JavaPOS.ESC_R(0) +
+                        JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_E(0) + "  " +
+                        JavaPOS.ESCLAMATION(65) + "00:00:00" +
+                        JavaPOS.ESCLAMATION(65) + "  " +
+                        JavaPOS.ESCLAMATION(65) + new Pad((!"".equals(rs.getString("pc_numero").trim()) ? rs.getString("pc_numero") : rs.getString("cx_contrato")),5).RPad() +
+                        JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_E(1) + (rs.getString("oper").contains("X") ? " EXTORNO" : "        ") + JavaPOS.ESC_E(0));
+
+                oldCx = rs.getString("autenticacao");
+              }
+
+              String dta = Dates.DateFormat("dd/MM/yyyy", rs.getDate("data"));
+              String bco = "", age = "", nch = "", vrl = "";              
+              if (!rs.getString("toper").toLowerCase().trim().equalsIgnoreCase("DN")) {
+                  bco = rs.getString("bco");
+                  age = rs.getString("agencia");
+                  nch = rs.getString("ncheque");
+                  vrl = new DecimalFormat("#,###.00").format(rs.getBigDecimal("valor"));
+              }
+
+              linhas = FuncoesGlobais.ArrayAdd(linhas, JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(0) + "       " +
+                      JavaPOS.ESCLAMATION(65) +
+               dta + " " + bco + " " + age + " " + nch + " " + new Pad(vrl,14).LPad() +
+                      " " + rs.getString("oper").replaceAll("CT", "BC"));
+
+              tdoc += LerValor.StringToFloat(vrl);
+          }
+        } catch (SQLException ex) {ex.printStackTrace();}
+        DbMain.FecharTabela(rs);
+
+        // Finaliza impressao
+        if (tdoc > 0) {
+            linhas[0] += "         " + JavaPOS.ESC_E(1) +
+                         new Pad(LerValor.floatToCurrency(tdoc, 2),14).LPad() +
+                         JavaPOS.ESC_E(0);
+            // imprimi
+            for (int i=0;i<linhas.length;i++) {printer.Print(JavaPOS.ESCLAMATION(65) + linhas[i], 1);}
+            tdoc = 0;  linhas = new String[] {};
+        }
+
+        // AVISO DE DEBITO
+        sSql = FuncoesGlobais.Subst(sql, new String[] {
+             Dates.DateFormat("yyyy-MM-dd", dData),
+             "DEB", "AVI"});
+        rs = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+
+        tam = DbMain.RecordCount(rs);
+        if (tam > 0) {printer.Print(
+                JavaPOS.ESCLAMATION(65) + JavaPOS.GS_EXC(16) + "AVISOS - DEBITOS" + JavaPOS.GS_EXC(0),1);
+                printer.Print(JavaPOS.ESCLAMATION(65) + "--------------------------------------------------------",1);
+        }
+        linhas = new String[] {};
+        tdoc = 0;
+        try {
+          String oldCx = "";
+          while (rs.next()) {
+              if (!oldCx.equals(rs.getString("autenticacao"))) {
+                if (tdoc > 0) {
+                    linhas[0] += "         " + JavaPOS.ESC_E(1) +
+                                 new Pad(LerValor.floatToCurrency(tdoc, 2),14).LPad() +
+                                 JavaPOS.ESC_E(0);
+                    // imprimi
+                    for (int i=0;i<linhas.length;i++) {printer.Print(JavaPOS.ESCLAMATION(65) + linhas[i], 1);}
+                    tdoc = 0;  linhas = new String[] {};
+                }
+                linhas = FuncoesGlobais.ArrayAdd(linhas, JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(0) + JavaPOS.ESC_E(1) +
+                        JavaPOS.ESC_R(1) + new Pad(rs.getString("autenticacao"),6).RPad() +
+                        JavaPOS.ESC_R(0) +
+                        JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_E(0) + "  " +
+                        JavaPOS.ESCLAMATION(65) + "00:00:00" +
+                        JavaPOS.ESCLAMATION(65) + "  " +
+                        JavaPOS.ESCLAMATION(65) + new Pad((!"".equals(rs.getString("pc_numero").trim()) ? rs.getString("pc_numero") : rs.getString("cx_contrato")),5).RPad() +
+                        JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_E(1) + (rs.getString("oper").contains("X") ? " EXTORNO" : "        ") + JavaPOS.ESC_E(0));
+
+                oldCx = rs.getString("autenticacao");
+              }
+
+              String dta = Dates.DateFormat("dd/MM/yyyy", rs.getDate("data"));
+              String bco = "", age = "", nch = "", vrl = "";              
+              if (!rs.getString("toper").toLowerCase().trim().equalsIgnoreCase("DN")) {
+                  bco = rs.getString("bco");
+                  age = rs.getString("agencia");
+                  nch = rs.getString("ncheque");
+                  vrl = new DecimalFormat("#,###.00").format(rs.getBigDecimal("valor"));
+              }
+
+              linhas = FuncoesGlobais.ArrayAdd(linhas, JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(0) + "       " +
+                      JavaPOS.ESCLAMATION(65) +
+               dta + " " + bco + " " + age + " " + nch + " " + new Pad(vrl,14).LPad() +
+                      " " + rs.getString("oper").replaceAll("CT", "BC"));
+
+              tdoc += LerValor.StringToFloat(vrl);
+          }
+        } catch (SQLException ex) {ex.printStackTrace();}
+        DbMain.FecharTabela(rs);
+
+        // Finaliza impressao
+        if (tdoc > 0) {
+            linhas[0] += "         " + JavaPOS.ESC_E(1) +
+                         new Pad(LerValor.floatToCurrency(tdoc, 2),14).LPad() +
+                         JavaPOS.ESC_E(0);
+            // imprimi
+            for (int i=0;i<linhas.length;i++) {printer.Print(JavaPOS.ESCLAMATION(65) + linhas[i], 1);}
+            tdoc = 0;  linhas = new String[] {};
+        }
+
+        // DESPESAS
+        sSql = FuncoesGlobais.Subst(sql, new String[] {
+             Dates.DateFormat("yyyy-MM-dd", dData),
+             "DEB", "DES"});
+        rs = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+
+        tam = DbMain.RecordCount(rs);
+        if (tam > 0) {printer.Print(
+                JavaPOS.ESCLAMATION(65) + JavaPOS.GS_EXC(16) + "DESPESAS" + JavaPOS.GS_EXC(0),1);
+                printer.Print(JavaPOS.ESCLAMATION(65) + "--------------------------------------------------------",1);
+        }
+        linhas = new String[] {};
+        tdoc = 0;
+        try {
+          String oldCx = "";
+          while (rs.next()) {
+              if (!oldCx.equals(rs.getString("autenticacao"))) {
+                if (tdoc > 0) {
+                    linhas[0] += "         " + JavaPOS.ESC_E(1) +
+                                 new Pad(LerValor.floatToCurrency(tdoc, 2),14).LPad() +
+                                 JavaPOS.ESC_E(0);
+                    // imprimi
+                    for (int i=0;i<linhas.length;i++) {printer.Print(JavaPOS.ESCLAMATION(65) + linhas[i], 1);}
+                    tdoc = 0;  linhas = new String[] {};
+                }
+                linhas = FuncoesGlobais.ArrayAdd(linhas, JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(0) + JavaPOS.ESC_E(1) +
+                        JavaPOS.ESC_R(1) + new Pad(rs.getString("autenticacao"),6).RPad() +
+                        JavaPOS.ESC_R(0) +
+                        JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_E(0) + "  " +
+                        JavaPOS.ESCLAMATION(65) + "00:00:00" +
+                        JavaPOS.ESCLAMATION(65) + "  " +
+                        JavaPOS.ESCLAMATION(65) + new Pad((!"".equals(rs.getString("pc_numero").trim()) ? rs.getString("pc_numero") : rs.getString("cx_contrato")),5).RPad() +
+                        JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_E(1) + (rs.getString("oper").contains("X") ? " EXTORNO" : "        ") + JavaPOS.ESC_E(0));
+
+                oldCx = rs.getString("autenticacao");
+              }
+
+              String dta = Dates.DateFormat("dd/MM/yyyy", rs.getDate("data"));
+              String bco = "", age = "", nch = "", vrl = "";              
+              if (!rs.getString("toper").toLowerCase().trim().equalsIgnoreCase("DN")) {
+                  bco = rs.getString("bco");
+                  age = rs.getString("agencia");
+                  nch = rs.getString("ncheque");
+                  vrl = new DecimalFormat("#,###.00").format(rs.getBigDecimal("valor"));
+              }
+
+              linhas = FuncoesGlobais.ArrayAdd(linhas, JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(0) + "       " +
+                      JavaPOS.ESCLAMATION(65) +
+               dta + " " + bco + " " + age + " " + nch + " " + new Pad(vrl,14).LPad() +
+                      " " + rs.getString("oper").replaceAll("CT", "BC"));
+
+              tdoc += LerValor.StringToFloat(vrl);
+          }
+        } catch (SQLException ex) {ex.printStackTrace();}
+        DbMain.FecharTabela(rs);
+
+        // Finaliza impressao
+        if (tdoc > 0) {
+            linhas[0] += "         " + JavaPOS.ESC_E(1) +
+                         new Pad(LerValor.floatToCurrency(tdoc, 2),14).LPad() +
+                         JavaPOS.ESC_E(0);
+            // imprimi
+            for (int i=0;i<linhas.length;i++) {printer.Print(JavaPOS.ESCLAMATION(65) + linhas[i], 1);}
+            tdoc = 0;  linhas = new String[] {};
+        }
+
+        // DEPOSITO
+        sSql = FuncoesGlobais.Subst(sql, new String[] {
+             Dates.DateFormat("yyyy-MM-dd", dData),
+             "DEB", "DEP"});
+        rs = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+
+        tam = DbMain.RecordCount(rs);
+        if (tam > 0) {printer.Print(
+                JavaPOS.ESCLAMATION(65) + JavaPOS.GS_EXC(16) + "DEPOSITOS" + JavaPOS.GS_EXC(0),1);
+                printer.Print(JavaPOS.ESCLAMATION(65) + "--------------------------------------------------------",1);
+        }
+        linhas = new String[] {};
+        tdoc = 0;
+        try {
+          String oldCx = "";
+          while (rs.next()) {
+              if (!oldCx.equals(rs.getString("autenticacao"))) {
+                if (tdoc > 0) {
+                    linhas[0] += "         " + JavaPOS.ESC_E(1) +
+                                 new Pad(LerValor.floatToCurrency(tdoc, 2),14).LPad() +
+                                 JavaPOS.ESC_E(0);
+                    // imprimi
+                    for (int i=0;i<linhas.length;i++) {printer.Print(JavaPOS.ESCLAMATION(65) + linhas[i], 1);}
+                    tdoc = 0;  linhas = new String[] {};
+                }
+                linhas = FuncoesGlobais.ArrayAdd(linhas, JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(0) + JavaPOS.ESC_E(1) +
+                        JavaPOS.ESC_R(1) + new Pad(rs.getString("autenticacao"),6).RPad() +
+                        JavaPOS.ESC_R(0) +
+                        JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_E(0) + "  " +
+                        JavaPOS.ESCLAMATION(65) + "00:00:00" +
+                        JavaPOS.ESCLAMATION(65) + "  " +
+                        JavaPOS.ESCLAMATION(65) + "     " +
+                        JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_E(1) + (rs.getString("oper").contains("X") ? " EXTORNO" : "        ") + JavaPOS.ESC_E(0));
+
+                oldCx = rs.getString("autenticacao");
+              }
+
+              String dta = Dates.DateFormat("dd/MM/yyyy", rs.getDate("data"));
+              String bco = "", age = "", nch = "", vrl = "";              
+              if (!rs.getString("toper").toLowerCase().trim().equalsIgnoreCase("DN")) {
+                  bco = rs.getString("bco");
+                  age = rs.getString("agencia");
+                  nch = rs.getString("ncheque");
+                  vrl = new DecimalFormat("#,###.00").format(rs.getBigDecimal("valor"));
+              }
+
+              linhas = FuncoesGlobais.ArrayAdd(linhas, JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(0) + "       " +
+                      JavaPOS.ESCLAMATION(65) +
+               dta + " " + bco + " " + age + " " + nch + " " + new Pad(vrl,14).LPad() +
+                      " " + rs.getString("oper").replaceAll("CT", "BC"));
+
+              try {tdoc += LerValor.StringToFloat(vrl);} catch (Exception ex) {}
+          }
+        } catch (SQLException ex) {ex.printStackTrace();}
+        DbMain.FecharTabela(rs);
+
+        // Finaliza impressao
+        if (tdoc > 0) {
+            linhas[0] += "         " + JavaPOS.ESC_E(1) +
+                         new Pad(LerValor.floatToCurrency(tdoc, 2),14).LPad() +
+                         JavaPOS.ESC_E(0);
+            // imprimi
+            for (int i=0;i<linhas.length;i++) {printer.Print(JavaPOS.ESCLAMATION(65) + linhas[i], 1);}
+            tdoc = 0;  linhas = new String[] {};
+        }
+
+        // PASSAGEM DE CAIXA - CREDITO
+        sSql = FuncoesGlobais.Subst(sql, new String[] {
+             Dates.DateFormat("yyyy-MM-dd", dData),
+             "CRE", "PCX"});
+        rs = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+
+        tam = DbMain.RecordCount(rs);
+        if (tam > 0) {printer.Print(
+                JavaPOS.ESCLAMATION(65) + JavaPOS.GS_EXC(16) + "PASSAGEM CAIXA - CREDITO" + JavaPOS.GS_EXC(0),1);
+                printer.Print(JavaPOS.ESCLAMATION(65) + "--------------------------------------------------------",1);
+        }
+        linhas = new String[] {};
+        tdoc = 0;
+        try {
+          String oldCx = "";
+          while (rs.next()) {
+              if (!oldCx.equals(rs.getString("autenticacao"))) {
+                if (tdoc > 0) {
+                    linhas[0] += "         " + JavaPOS.ESC_E(1) +
+                                 new Pad(LerValor.floatToCurrency(tdoc, 2),14).LPad() +
+                                 JavaPOS.ESC_E(0);
+                    // imprimi
+                    for (int i=0;i<linhas.length;i++) {printer.Print(JavaPOS.ESCLAMATION(65) + linhas[i], 1);}
+                    tdoc = 0;  linhas = new String[] {};
+                }
+                linhas = FuncoesGlobais.ArrayAdd(linhas, JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(0) + JavaPOS.ESC_E(1) +
+                        JavaPOS.ESC_R(1) + new Pad(rs.getString("autenticacao"),6).RPad() +
+                        JavaPOS.ESC_R(0) +
+                        JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_E(0) + "  " +
+                        JavaPOS.ESCLAMATION(65) + "00:00:00" +
+                        JavaPOS.ESCLAMATION(65) + "  " +
+                        JavaPOS.ESCLAMATION(65) + "     " +
+                        JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_E(1) + (rs.getString("oper").contains("X") ? " EXTORNO" : "        ") + JavaPOS.ESC_E(0));
+
+                oldCx = rs.getString("autenticacao");
+              }
+
+              String dta = Dates.DateFormat("dd/MM/yyyy", rs.getDate("data"));
+              String bco = "", age = "", nch = "", vrl = "";              
+              if (!rs.getString("toper").toLowerCase().trim().equalsIgnoreCase("DN")) {
+                  bco = rs.getString("bco");
+                  age = rs.getString("agencia");
+                  nch = rs.getString("ncheque");
+                  vrl = new DecimalFormat("#,###.00").format(rs.getBigDecimal("valor"));
+              }
+
+              linhas = FuncoesGlobais.ArrayAdd(linhas, JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(0) + "       " +
+                      JavaPOS.ESCLAMATION(65) +
+               dta + " " + bco + " " + age + " " + nch + " " + new Pad(vrl,14).LPad() +
+                      " " + rs.getString("oper").replaceAll("CT", "BC"));
+
+              tdoc += LerValor.StringToFloat(vrl);
+          }
+        } catch (SQLException ex) {ex.printStackTrace();}
+        DbMain.FecharTabela(rs);
+
+        // Finaliza impressao
+        if (tdoc > 0) {
+            linhas[0] += "         " + JavaPOS.ESC_E(1) +
+                         new Pad(LerValor.floatToCurrency(tdoc, 2),14).LPad() +
+                         JavaPOS.ESC_E(0);
+            // imprimi
+            for (int i=0;i<linhas.length;i++) {printer.Print(JavaPOS.ESCLAMATION(65) + linhas[i], 1);}
+            tdoc = 0;  linhas = new String[] {};
+        }
+
+        // PASSAGEM DE CAIXA - DEBITO
+        sSql = FuncoesGlobais.Subst(sql, new String[] {
+             Dates.DateFormat("yyyy-MM-dd", dData),
+             "DEB", "PCX"});
+        rs = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+
+        tam = DbMain.RecordCount(rs);
+        if (tam > 0) {printer.Print(
+                JavaPOS.ESCLAMATION(65) + JavaPOS.GS_EXC(16) + "PASSAGEM CAIXA - DEBITO" + JavaPOS.GS_EXC(0),1);
+                printer.Print(JavaPOS.ESCLAMATION(65) + "--------------------------------------------------------",1);
+        }
+        linhas = new String[] {};
+        tdoc = 0;
+        try {
+          String oldCx = "";
+          while (rs.next()) {
+              if (!oldCx.equals(rs.getString("autenticacao"))) {
+                if (tdoc > 0) {
+                    linhas[0] += "         " + JavaPOS.ESC_E(1) +
+                                 new Pad(LerValor.floatToCurrency(tdoc, 2),14).LPad() +
+                                 JavaPOS.ESC_E(0);
+                    // imprimi
+                    for (int i=0;i<linhas.length;i++) {printer.Print(JavaPOS.ESCLAMATION(65) + linhas[i], 1);}
+                    tdoc = 0;  linhas = new String[] {};
+                }
+                linhas = FuncoesGlobais.ArrayAdd(linhas, JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(0) + JavaPOS.ESC_E(1) +
+                        JavaPOS.ESC_R(1) + new Pad(rs.getString("autenticacao"),6).RPad() +
+                        JavaPOS.ESC_R(0) +
+                        JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_E(0) + "  " +
+                        JavaPOS.ESCLAMATION(65) + "00:00:00" +
+                        JavaPOS.ESCLAMATION(65) + "  " +
+                        JavaPOS.ESCLAMATION(65) + "     " +
+                        JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_E(1) + (rs.getString("oper").contains("X") ? " EXTORNO" : "        ") + JavaPOS.ESC_E(0));
+
+                oldCx = rs.getString("autenticacao");
+              }
+
+              String dta = Dates.DateFormat("dd/MM/yyyy", rs.getDate("data"));
+              String bco = "", age = "", nch = "", vrl = "";              
+              if (!rs.getString("toper").toLowerCase().trim().equalsIgnoreCase("DN")) {
+                  bco = rs.getString("bco");
+                  age = rs.getString("agencia");
+                  nch = rs.getString("ncheque");
+                  vrl = new DecimalFormat("#,###.00").format(rs.getBigDecimal("valor"));
+              }
+
+              linhas = FuncoesGlobais.ArrayAdd(linhas, JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(0) + "       " +
+                      JavaPOS.ESCLAMATION(65) +
+               dta + " " + bco + " " + age + " " + nch + " " + new Pad(vrl,14).LPad() +
+                      " " + rs.getString("oper").replaceAll("CT", "BC"));
+
+              tdoc += LerValor.StringToFloat(vrl);
+          }
+        } catch (SQLException ex) {ex.printStackTrace();}
+        DbMain.FecharTabela(rs);
+
+        // Finaliza impressao
+        if (tdoc > 0) {
+            linhas[0] += "         " + JavaPOS.ESC_E(1) +
+                         new Pad(LerValor.floatToCurrency(tdoc, 2),14).LPad() +
+                         JavaPOS.ESC_E(0);
+            // imprimi
+            for (int i=0;i<linhas.length;i++) {printer.Print(JavaPOS.ESCLAMATION(65) + linhas[i], 1);}
+            tdoc = 0;  linhas = new String[] {};
+        }
+
+        // APURACAO DE CAIXA ANTERIOR - CREDITO
+        final String sql2 = "SELECT * FROM ncaixa WHERE data <= '&1.' AND tipo = '&2.' AND oper LIKE '&3.%' ORDER BY autenticacao, oper desc;";
+        sSql = FuncoesGlobais.Subst(sql2, new String[] {
+             Dates.DateFormat("yyyy-MM-dd", dData),
+             "CRE", "CX"});
+        rs = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+
+        tam = DbMain.RecordCount(rs);
+        if (tam > 0) {printer.Print(
+                JavaPOS.ESCLAMATION(65) + JavaPOS.GS_EXC(16) + "CAIXA" + JavaPOS.GS_EXC(0),1);
+                printer.Print(JavaPOS.ESCLAMATION(65) + "--------------------------------------------------------",1);
+        }
+        linhas = new String[] {};
+        tdoc = 0;
+        try {
+          String oldCx = "";
+          while (rs.next()) {
+              if (!oldCx.equals(rs.getString("autenticacao"))) {
+                if (tdoc > 0) {
+                    linhas[0] += "         " + JavaPOS.ESC_E(1) +
+                                 new Pad(LerValor.floatToCurrency(tdoc, 2),14).LPad() +
+                                 JavaPOS.ESC_E(0);
+                    // imprimi
+                    for (int i=0;i<linhas.length;i++) {printer.Print(JavaPOS.ESCLAMATION(65) + linhas[i], 1);}
+                    tdoc = 0;  linhas = new String[] {};
+                }
+                linhas = FuncoesGlobais.ArrayAdd(linhas, JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(0) + JavaPOS.ESC_E(1) +
+                        JavaPOS.ESC_R(1) + new Pad("$$$$$",6).RPad() +
+                        JavaPOS.ESC_R(0) +
+                        JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_E(0) + "  " +
+                        JavaPOS.ESCLAMATION(65) + "00:00:00" +
+                        JavaPOS.ESCLAMATION(65) + "  " +
+                        JavaPOS.ESCLAMATION(65) + "     " +
+                        JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_E(1) + "        " + JavaPOS.ESC_E(0));
+
+                oldCx = rs.getString("autenticacao");
+              }
+
+              String dta = Dates.DateFormat("dd/MM/yyyy", rs.getDate("data"));
+              String bco = "", age = "", nch = "", vrl = "";              
+              if (!rs.getString("toper").toLowerCase().trim().equalsIgnoreCase("DN")) {
+                  bco = rs.getString("bco");
+                  age = rs.getString("agencia");
+                  nch = rs.getString("ncheque");
+                  vrl = new DecimalFormat("#,###.00").format(rs.getBigDecimal("valor"));
+              }
+
+              linhas = FuncoesGlobais.ArrayAdd(linhas, JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(0) + "       " +
+                      JavaPOS.ESCLAMATION(65) +
+               dta + " " + bco + " " + age + " " + nch + " " + new Pad(vrl,14).LPad() +
+                      " " + rs.getString("oper").replaceAll("CT", "BC"));
+
+              try {tdoc += LerValor.StringToFloat(vrl);} catch (Exception ex) {}
+          }
+        } catch (SQLException ex) {ex.printStackTrace();}
+        DbMain.FecharTabela(rs);
+
+        // Finaliza impressao
+        if (tdoc > 0) {
+            linhas[0] += "         " + JavaPOS.ESC_E(1) +
+                         new Pad(LerValor.floatToCurrency(tdoc, 2),14).LPad() +
+                         JavaPOS.ESC_E(0);
+            // imprimi
+            for (int i=0;i<linhas.length;i++) {printer.Print(JavaPOS.ESCLAMATION(65) + linhas[i], 1);}
+            tdoc = 0;  linhas = new String[] {};
+        }
+
+        printer.Print(JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(1) + "",1);
+        printer.Print(JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(1) + JavaPOS.GS_EXC(16) +
+                          "RESUMO DO FECHAMENTO" + JavaPOS.GS_EXC(0),1);
+        printer.Print(JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(1) + "",1);
+        printer.Print(JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(1) + "DSC |  DINHEIRO  |   CHEQUE   | PRE-DATADO |   BANCOS   ",1);
+        printer.Print(JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(1) + "--------------------------------------------------------",1);
+
+        ////// >>>>>>>>>>>>>>>>
+        float[][] m_Totais = Totaliza(Dates.DateFormat("yyyy-MM-dd", dData));
+        String tmpString = "";
+
+        if (m_Totais[0][0] + m_Totais[0][1] + m_Totais[0][2] + m_Totais[0][3] > 0) {
+          tmpString = "REC " + "   ";
+          tmpString += new Pad(LerValor.floatToCurrency(m_Totais[0][0],2),10).LPad() + "   ";
+          tmpString += new Pad(LerValor.floatToCurrency(m_Totais[0][1],2),10).LPad() + "   ";
+          tmpString += new Pad(LerValor.floatToCurrency(m_Totais[0][2],2),10).LPad() + "   ";
+          //tmpString += new Pad(LerValor.floatToCurrency(m_Totais[0][0] + m_Totais[0][1] + m_Totais[0][2],2),10).LPad();
+          tmpString += new Pad(LerValor.floatToCurrency(m_Totais[0][3],2),10).LPad();
+          printer.Print(JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(1) + tmpString,1);
+        }
+
+        if (m_Totais[1][0] + m_Totais[1][1] + m_Totais[1][2] + m_Totais[1][3] > 0) {
+          tmpString = "EXT " + "   ";
+          tmpString += new Pad(LerValor.floatToCurrency(m_Totais[1][0],2),10).LPad() + "   ";
+          tmpString += new Pad(LerValor.floatToCurrency(m_Totais[1][1],2),10).LPad() + "   ";
+          tmpString += new Pad(LerValor.floatToCurrency(m_Totais[1][2],2),10).LPad() + "   ";
+          //tmpString += new Pad(LerValor.floatToCurrency(m_Totais[1][0] + m_Totais[1][1] + m_Totais[1][2],2),10).LPad();
+          tmpString += new Pad(LerValor.floatToCurrency(m_Totais[1][3],2),10).LPad();
+          printer.Print(JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(1) + tmpString,1);
+        }
+
+        if (m_Totais[9][0] + m_Totais[9][1] + m_Totais[9][2] + m_Totais[9][3] > 0) {
+          tmpString = "ADI " + "   ";
+          tmpString += new Pad(LerValor.floatToCurrency(m_Totais[9][0],2),10).LPad() + "   ";
+          tmpString += new Pad(LerValor.floatToCurrency(m_Totais[9][1],2),10).LPad() + "   ";
+          tmpString += new Pad(LerValor.floatToCurrency(m_Totais[9][2],2),10).LPad() + "   ";
+          //tmpString += new Pad(LerValor.floatToCurrency(m_Totais[9][0] + m_Totais[9][1] + m_Totais[9][2],2),10).LPad();
+          tmpString += new Pad(LerValor.floatToCurrency(m_Totais[9][3],2),10).LPad();
+          printer.Print(JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(1) + tmpString,1);
+        }            
+
+        if (m_Totais[4][0] + m_Totais[4][1] + m_Totais[4][2] + m_Totais[4][3] > 0) {
+          tmpString = "AVC " + "   ";
+          tmpString += new Pad(LerValor.floatToCurrency(m_Totais[4][0],2),10).LPad() + "   ";
+          tmpString += new Pad(LerValor.floatToCurrency(m_Totais[4][1],2),10).LPad() + "   ";
+          tmpString += new Pad(LerValor.floatToCurrency(m_Totais[4][2],2),10).LPad() + "   ";
+          //tmpString += new Pad(LerValor.floatToCurrency(m_Totais[4][0] + m_Totais[4][1] + m_Totais[4][2],2),10).LPad();
+          tmpString += new Pad(LerValor.floatToCurrency(m_Totais[4][3],2),10).LPad();
+          printer.Print(JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(1) + tmpString,1);
+        }
+
+        if (m_Totais[5][0] + m_Totais[5][1] + m_Totais[5][2] + m_Totais[5][3] > 0) {
+          tmpString = "AVD " + "   ";
+          tmpString += new Pad(LerValor.floatToCurrency(m_Totais[5][0],2),10).LPad() + "   ";
+          tmpString += new Pad(LerValor.floatToCurrency(m_Totais[5][1],2),10).LPad() + "   ";
+          tmpString += new Pad(LerValor.floatToCurrency(m_Totais[5][2],2),10).LPad() + "   ";
+          //tmpString += new Pad(LerValor.floatToCurrency(m_Totais[5][0] + m_Totais[5][1] + m_Totais[5][2],2),10).LPad();
+          tmpString += new Pad(LerValor.floatToCurrency(m_Totais[5][3],2),10).LPad();
+          printer.Print(JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(1) + tmpString,1);
+        }
+
+        if (m_Totais[2][0] + m_Totais[2][1] + m_Totais[2][2] + m_Totais[2][3] > 0) {
+          tmpString = "DES " + "   ";
+          tmpString += new Pad(LerValor.floatToCurrency(m_Totais[2][0],2),10).LPad() + "   ";
+          tmpString += new Pad(LerValor.floatToCurrency(m_Totais[2][1],2),10).LPad() + "   ";
+          tmpString += new Pad(LerValor.floatToCurrency(m_Totais[2][2],2),10).LPad() + "   ";
+          //tmpString += new Pad(LerValor.floatToCurrency(m_Totais[2][0] + m_Totais[2][1] + m_Totais[2][2],2),10).LPad();
+          tmpString += new Pad(LerValor.floatToCurrency(m_Totais[2][3],2),10).LPad();
+          printer.Print(JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(1) + tmpString,1);
+        }
+
+        if (m_Totais[3][0] + m_Totais[3][1] + m_Totais[3][2] + m_Totais[3][3] > 0) {
+          tmpString = "DEP " + "   ";
+          tmpString += new Pad(LerValor.floatToCurrency(m_Totais[3][0],2),10).LPad() + "   ";
+          tmpString += new Pad(LerValor.floatToCurrency(m_Totais[3][1],2),10).LPad() + "   ";
+          tmpString += new Pad(LerValor.floatToCurrency(m_Totais[3][2],2),10).LPad() + "   ";
+          //tmpString += new Pad(LerValor.floatToCurrency(m_Totais[3][0] + m_Totais[3][1] + m_Totais[3][2],2),10).LPad();
+          tmpString += new Pad(LerValor.floatToCurrency(m_Totais[3][3],2),10).LPad();
+          printer.Print(JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(1) + tmpString,1);
+        }
+
+        if (m_Totais[7][0] + m_Totais[7][1] + m_Totais[7][2] + m_Totais[7][3] > 0) {
+          tmpString = "PCC " + "   ";
+          tmpString += new Pad(LerValor.floatToCurrency(m_Totais[7][0],2),10).LPad() + "   ";
+          tmpString += new Pad(LerValor.floatToCurrency(m_Totais[7][1],2),10).LPad() + "   ";
+          tmpString += new Pad(LerValor.floatToCurrency(m_Totais[7][2],2),10).LPad() + "   ";
+          //tmpString += new Pad(LerValor.floatToCurrency(m_Totais[7][0] + m_Totais[7][1] + m_Totais[7][2],2),10).LPad();
+          tmpString += new Pad(LerValor.floatToCurrency(m_Totais[7][3],2),10).LPad();
+          printer.Print(JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(1) + tmpString,1);
+        }
+
+        if (m_Totais[8][0] + m_Totais[8][1] + m_Totais[8][2] + m_Totais[8][3] > 0) {
+          tmpString = "PCD " + "   ";
+          tmpString += new Pad(LerValor.floatToCurrency(m_Totais[8][0],2),10).LPad() + "   ";
+          tmpString += new Pad(LerValor.floatToCurrency(m_Totais[8][1],2),10).LPad() + "   ";
+          tmpString += new Pad(LerValor.floatToCurrency(m_Totais[8][2],2),10).LPad() + "   ";
+          //tmpString += new Pad(LerValor.floatToCurrency(m_Totais[8][0] + m_Totais[8][1] + m_Totais[8][2],2),10).LPad();
+          tmpString += new Pad(LerValor.floatToCurrency(m_Totais[8][3],2),10).LPad();
+          printer.Print(JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(1) + tmpString,1);
+        }
+
+        if (m_Totais[6][0] + m_Totais[6][1] + m_Totais[6][2] + m_Totais[6][3] > 0) {
+          tmpString = "CAX " + "   ";
+          tmpString += new Pad(LerValor.floatToCurrency(m_Totais[6][0],2),10).LPad() + "   ";
+          tmpString += new Pad(LerValor.floatToCurrency(m_Totais[6][1],2),10).LPad() + "   ";
+          tmpString += new Pad(LerValor.floatToCurrency(m_Totais[6][2],2),10).LPad() + "   ";
+          //tmpString += new Pad(LerValor.floatToCurrency(m_Totais[6][0] + m_Totais[6][1] + m_Totais[6][2],2),10).LPad();
+          tmpString += new Pad(LerValor.floatToCurrency(m_Totais[6][3],2),10).LPad();
+          printer.Print(JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(1) + tmpString,1);
+        }
+
+        tt_apu_dn = LerValor.StringToFloat(jDN.getText());
+        tt_apu_ch = LerValor.StringToFloat(jCH.getText());
+        tt_apu_cp = LerValor.StringToFloat("0,00");
+
+        tmpString = "ACX " + "   ";
+        tmpString += new Pad(LerValor.floatToCurrency(tt_apu_dn,2),10).LPad() + "   ";
+        tmpString += new Pad(LerValor.floatToCurrency(tt_apu_ch,2),10).LPad() + "   ";
+        tmpString += new Pad(LerValor.floatToCurrency(tt_apu_cp,2),10).LPad() + "   ";
+        //tmpString += new Pad(LerValor.floatToCurrency(tt_apu_dn + tt_apu_ch + tt_apu_cp,2),10).LPad();
+        tmpString += new Pad(LerValor.floatToCurrency(0,2),10).LPad();
+        printer.Print(JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(1) + tmpString,1);
+
+        float tt_etd_dn = m_Totais[4][0] + m_Totais[0][0] + m_Totais[6][0] + m_Totais[7][0];
+        float tt_etd_ch = m_Totais[4][1] + m_Totais[0][1] + m_Totais[6][1] + m_Totais[7][1];
+        float tt_etd_cp = m_Totais[4][2] + m_Totais[0][2] + m_Totais[6][2] + m_Totais[7][2];
+        float tt_etd_ct = m_Totais[0][3] + m_Totais[4][3];
+
+        float tt_eta_dn = m_Totais[5][0] + m_Totais[3][0] + m_Totais[2][0] + m_Totais[1][0] + m_Totais[8][0] + m_Totais[9][0];
+        float tt_eta_ch = m_Totais[3][1] + m_Totais[8][1];
+        float tt_eta_cp = m_Totais[5][2] + m_Totais[3][2] + m_Totais[2][2] + m_Totais[1][2] + m_Totais[8][2];
+        float tt_eta_ct = 0;
+
+        /////////////////////////////////////////
+        printer.Print(JavaPOS.ESCLAMATION(65) + "", 1);
+        printer.Print(JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(1) + JavaPOS.GS_EXC(16) +
+                          "RESULTADO FINAL" + JavaPOS.GS_EXC(0),1);
+        printer.Print(JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(1) + "",1);
+
+        tmpString = new Pad("TOTAL DINHEIRO", 16).RPad() + "   ";
+        tmpString += new Pad(LerValor.floatToCurrency(tt_etd_dn - tt_eta_dn - tt_apu_dn,2),15).LPad();
+        printer.Print(JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(0) +  tmpString,1);
+
+        tmpString = new Pad("TOTAL CHEQUE", 16).RPad() + "   ";
+        tmpString += new Pad(LerValor.floatToCurrency(tt_etd_ch - tt_eta_ch - tt_apu_ch,2),15).LPad();
+        printer.Print(JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(0) +  tmpString,1);
+
+        tmpString = new Pad("TOTAL PRE-DATADO", 16).RPad() + "   ";
+        tmpString += new Pad(LerValor.floatToCurrency(tt_etd_cp - tt_eta_cp - tt_apu_cp,2),15).LPad();
+        printer.Print(JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(0) +  tmpString,1);
+
+        tmpString = new Pad("TOTAL BANCOS", 16).RPad() + "   ";
+        tmpString += new Pad(LerValor.floatToCurrency(tt_etd_ct - tt_eta_ct - 0,2),15).LPad();
+        printer.Print(JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(0) +  tmpString,1);
+
+        printer.Print(JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(0) + "",1);
+        printer.Print(JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(0) + "",1);
+
+        float ntt_entradas = tt_etd_dn + tt_etd_ch + tt_etd_cp;
+        float ntt_saidas = tt_eta_ch + tt_eta_dn + tt_eta_cp + tt_apu_dn + tt_apu_ch + tt_apu_cp;
+        //'float ntr_saidas = tt_eta_ch + tt_eta_dn + tt_eta_cp;
+
+        tmpString = new Pad("TOTAL ENTRADAS", 16).RPad() + "   ";
+        tmpString += new Pad(LerValor.floatToCurrency(ntt_entradas,2),15).LPad();
+        printer.Print(JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(0) +  tmpString,1);
+
+        tmpString = new Pad("TOTAL SAIDAS", 16).RPad() + "   ";
+        //'PutPrinter RValor((tt_eta_ch + tt_eta_dn + m_Totais(3)(1) + m_Totais(3)(2)) + tt_apu_dn + tt_apu_ch + tt_apu_cp), , 1
+        tmpString += new Pad(LerValor.floatToCurrency(ntt_saidas,2),15).LPad();
+        printer.Print(JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(0) +  tmpString,1);
+        printer.Print(JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(0) +  "----------------------------------",1);
+        ////////////////////////////////
+
+        m_Saldo = ntt_entradas - ntt_saidas;
+        tmpString = new Pad("SALDO", 16).RPad() + "   " + new Pad(LerValor.floatToCurrency(m_Saldo,2),15).LPad() + "   ";
+
+        if (m_Saldo < 0) {
+          tmpString += "SOBRA DE CAIXA";
+        } else if (m_Saldo > 0) {
+          tmpString += "FALTA DE CAIXA";
+        } else {
+          tmpString += "CAIXA OK!?";
+        }
+        printer.Print(JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(0) +  tmpString,1);
+
+        printer.Print(JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(0) +  "",1);
+        printer.Print(JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(0) +  "",1);
+
+        printer.Print(JavaPOS.ESCLAMATION(65) + JavaPOS.ESC_A(0) +  "OBSERVACOES DO CAIXA:",1);
+
+        // Pula linhas (6) / corta papel
+        for (int k=1;k<=15;k++) { printer.Print(JavaPOS.ESCLAMATION(65) + "", 1); }
+
+        // Cortar o papel
+        printer.Print(JavaPOS.FULLCUT, 1);
+
+        //printer.Close();
+        new toPrint(docName, VariaveisGlobais.Caixa.split(",")[0],VariaveisGlobais.Caixa.split(",")[1],VariaveisGlobais.Caixa.split(",")[2]);
+        printer.setDocName("");
+
+        String sExecuteSql = "";
+        //* Deleta o caixa
+        //sExecuteSql = FuncoesGlobais.Subst("DELETE FROM ncaixa WHERE data <= '&1.';", new String[] {Dates.DateFormat("yyyy-MM-dd", dData)});
+        conn.ExecutarComando(sExecuteSql);
+
+        this.dispose();
+    }            
+
+    private String[] PegaValor(String lnh) {
+        String dta = "", bco = "", age = "", nch = "", vrl = "";
+        int pos = -1;
+        
+        pos = lnh.indexOf("DT:");
+        if (pos > -1) { dta = lnh.substring(pos + 3, pos + 3 + 10); } else dta = "          ";
+
+        pos = lnh.indexOf("BC:");
+        if (pos > -1) { bco = lnh.substring(pos + 3, pos + 3 + 3); } else bco = "   ";
+
+        pos = lnh.indexOf("AG:");
+        if (pos > -1) { age = lnh.substring(pos + 3, pos + 3 + 5); } else age = "     ";
+
+        pos = lnh.indexOf("CH:");
+        if (pos > -1) { nch = lnh.substring(pos + 3, pos + 3 + 10); } else nch = "          ";
+
+        pos =  lnh.indexOf("CT:");
+        if (pos > -1) { vrl = lnh.substring(pos + 3); }
+
+        pos = lnh.indexOf("DN:");
+        if (pos > -1) { vrl = lnh.substring(pos + 3); }
+        
+        pos = lnh.indexOf("VR:");
+        if (pos > -1) { vrl = lnh.substring(pos + 3); }
+        
+        
+        return new String[] {dta, bco, age, nch, vrl};
+    }
+    
+    private float[][] Totaliza(String dDataCaixa) {
+        ResultSet myRst;
+        String sSql = "";
+        float tt_recibo_dn = 0, tt_recibo_ch = 0, tt_recibo_cp = 0, tt_recibo_ct = 0;
+        float tt_extrato_dn = 0, tt_extrato_ch = 0, tt_extrato_cp = 0, tt_extrato_ct = 0;
+        float tt_despesa_dn = 0, tt_despesa_ch = 0, tt_despesa_cp = 0, tt_despesa_ct = 0;
+        float tt_deposito_dn = 0, tt_deposito_ch = 0, tt_deposito_cp = 0, tt_deposito_ct = 0;
+        float tt_avcred_dn = 0, tt_avcred_ch = 0, tt_avcred_cp = 0, tt_avcred_ct = 0;
+        float tt_avdeb_dn = 0, tt_avdeb_ch = 0, tt_avdeb_cp = 0, tt_avdeb_ct = 0;
+        float tt_caixa_dn = 0, tt_caixa_ch = 0, tt_caixa_cp = 0, tt_caixa_ct = 0;
+        float tt_pass_dn = 0, tt_pass_ch = 0, tt_pass_cp = 0, tt_pass_ct = 0;
+        float tt_passd_dn = 0, tt_passd_ch = 0, tt_passd_cp = 0, tt_passd_ct = 0;
+        float tt_adi_dn = 0, tt_adi_ch = 0, tt_adi_cp = 0, tt_adi_ct = 0;
+        
+        //'* RECIBOS
+        tt_recibo_dn = 0;
+        tt_recibo_ch = 0;
+        tt_recibo_cp = 0;
+        tt_recibo_ct = 0;
+        
+        // RECIBO DINHEIRO
+        sSql = "select CASE WHEN toper != 'DN' THEN 0 ELSE valor END as valor1 ,CASE WHEN toper = 'DN' THEN 0 ELSE valor END as valor2, " +
+            "CASE WHEN toper != 'DN' THEN 0 ELSE valor END + CASE WHEN toper = 'DN' THEN 0 ELSE valor END as Total from ncaixa where " +
+                "oper = '" + "DN' and tipo = 'CRE' and trim(LOWER(oper)) = 'rc'" +
+            " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_recibo_dn = tt_recibo_dn + myRst.getFloat("valor1");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        // RECIBO CHEQUE/DINHEIRO
+        sSql = "select CASE WHEN toper != 'DN' THEN 0 ELSE valor END as valor1,CASE WHEN toper = 'DN' THEN 0 ELSE valor END as valor2, " +
+                "CASE WHEN toper != 'DN' THEN 0 ELSE valor END + CASE WHEN toper = 'DN' THEN 0 ELSE valor END as Total from ncaixa where " +
+                "oper = '" + "CD' and tipo = 'CRE' and trim(LOWER(oper)) = 'rc'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_recibo_dn = tt_recibo_dn + myRst.getFloat("valor1");
+                tt_recibo_ch = tt_recibo_ch + myRst.getFloat("valor2");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* RECIBO/CHEQUE
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where " +
+                "oper = '" + "CH' and tipo = 'CRE' and trim(LOWER(oper)) = 'rc'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_recibo_ch = tt_recibo_ch + myRst.getFloat("valor2");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* RECIBO/CHEQUE-PRE
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where " +
+                "oper = '" + "CP' and tipo = 'CRE' and trim(LOWER(oper)) = 'rc'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_recibo_cp = tt_recibo_cp + myRst.getFloat("valor2");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* RECIBO/CARTAO
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where " +
+                "oper = '" + "CT' and tipo = 'CRE' and trim(LOWER(oper)) = 'rc'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_recibo_ct += myRst.getFloat("valor1");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* EXTRATOS
+        tt_extrato_dn = 0;
+        tt_extrato_ch = 0;
+        tt_extrato_cp = 0;
+        tt_extrato_ct = 0;
+        
+        //* EXTRATO/DINHEIRO
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where " +
+                "oper = '" + "DN' and tipo = 'DEB' and trim(LOWER(oper)) = 'et'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_extrato_dn = myRst.getFloat("valor1");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* EXTRATO CHEQUE/DINHEIRO
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where " +
+                "oper = '" + "CD' and tipo = 'DEB' and trim(LOWER(oper)) = 'et'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_extrato_dn = tt_extrato_dn + myRst.getFloat("valor1");
+                tt_extrato_ch = myRst.getFloat("valor2");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* EXTRATO/CHEQUE
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where oper = '" + "CH' and tipo = 'DEB' and trim(LOWER(oper)) = 'et'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_extrato_ch = tt_extrato_ch + myRst.getFloat("valor2");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* EXTRATO/CHEQUE-PRE
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where oper = '" + "CP' and tipo = 'DEB' and trim(LOWER(oper)) = 'et'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_extrato_cp = 0 + myRst.getFloat("valor2");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* EXTRATO/CARTAO
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where oper = '" + "CT' and tipo = 'DEB' and trim(LOWER(oper)) = 'et'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_extrato_ct += myRst.getFloat("valor1");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* DESPESAS
+        tt_despesa_dn = 0;
+        tt_despesa_ch = 0;
+        tt_despesa_cp = 0;
+        tt_despesa_ct = 0;
+        
+        //* DESPESA/DINHEIRO
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where oper = '" + "DN' and tipo = 'DEB' and trim(LOWER(oper)) = 'dp'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_despesa_dn = 0 + myRst.getFloat("valor1");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* DESPESA CHEQUE/DINHEIRO
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where oper = '" + "CD' and tipo = 'DEB' and trim(LOWER(oper)) = 'dp'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_despesa_dn = tt_despesa_dn + myRst.getFloat("valor1");
+                tt_despesa_ch = 0 + myRst.getFloat("valor2");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* DESPESA/CHEQUE
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where oper = '" + "CH' and tipo = 'DEB' and trim(LOWER(oper)) = 'dp'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_despesa_ch = tt_despesa_ch + myRst.getFloat("valor2");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* DESPESA/CHEQUE-PRE
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where oper = '" + "CP' and tipo = 'DEB' and trim(LOWER(oper)) = 'dp'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_despesa_cp = 0 + myRst.getFloat("valor2");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* DESPESA/CARTAO
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where oper = '" + "CT' and tipo = 'DEB' and trim(LOWER(oper)) = 'dp'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_despesa_ct += myRst.getFloat("valor1");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* DEPOSITOS
+        tt_deposito_dn = 0;
+        tt_deposito_ch = 0;
+        tt_deposito_cp = 0;
+        tt_deposito_ct = 0;
+        
+        //* DEPOSITO/DINHEIRO
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where oper = '" + "DN' and tipo = 'DEB' and trim(LOWER(oper)) = 'ds'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_deposito_dn = 0 + myRst.getFloat("valor1");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* DEPOSITO CHEQUE/DINHEIRO
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where oper = '" + "CD' and tipo = 'DEB' and trim(LOWER(oper)) = 'ds'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_deposito_dn = tt_deposito_dn + myRst.getFloat("valor1");
+                tt_deposito_ch = 0 + myRst.getFloat("valor2");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* DEPOSITO/CHEQUE
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where oper = '" + "CH' and tipo = 'DEB' and trim(LOWER(oper)) = 'ds'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_deposito_ch = tt_deposito_ch + myRst.getFloat("valor2");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* DEPOSITO/CHEQUE-PRE
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where oper = '" + "CP' and tipo = 'DEB' and trim(LOWER(oper)) = 'ds'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_deposito_cp = 0 + myRst.getFloat("valor2");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* DEPOSITO/CARTAO
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where oper = '" + "CT' and tipo = 'DEB' and trim(LOWER(oper)) = 'ds'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_deposito_ct += myRst.getFloat("valor1");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* AVISOS CREDITOS
+        tt_avcred_dn = 0;
+        tt_avcred_ch = 0;
+        tt_avcred_cp = 0;
+        tt_avcred_ct = 0;
+        
+        //* AVCRED/DINHEIRO
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where oper = '" + "DN' and tipo = 'CRE' and trim(LOWER(oper)) = 'av'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_avcred_dn = 0 + myRst.getFloat("valor1");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* AVCRED CHEQUE/DINHEIRO
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where oper = '" + "CD' and tipo = 'CRE' and trim(LOWER(oper)) = 'av'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_avcred_dn = tt_avcred_dn + myRst.getFloat("valor1");
+                tt_avcred_ch = 0 + myRst.getFloat("valor2");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* AVCRED/CHEQUE
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where oper = '" + "CH' and tipo = 'CRE' and trim(LOWER(oper)) = 'av'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_avcred_ch = tt_avcred_ch + myRst.getFloat("valor2");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* AVCRED/CHEQUE-PRE
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where oper = '" + "CP' and tipo = 'CRE' and trim(LOWER(oper)) = 'av'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_avcred_cp = 0 + myRst.getFloat("valor2");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* AVCRED/CHEQUE-PRE
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where oper = '" + "CT' and tipo = 'CRE' and trim(LOWER(oper)) = 'av'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_avcred_ct += myRst.getFloat("valor1");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* AVISOS DEBITOS
+        tt_avdeb_dn = 0;
+        tt_avdeb_ch = 0;
+        tt_avdeb_cp = 0;
+        tt_avdeb_ct = 0;
+        
+        //* avdeb/DINHEIRO
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where oper = '" + "DN' and tipo = 'DEB' and trim(LOWER(oper)) = 'av'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_avdeb_dn = 0 + myRst.getFloat("valor1");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* avdeb CHEQUE/DINHEIRO
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where oper = '" + "CD' and tipo = 'DEB' and trim(LOWER(oper)) = 'av'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_avdeb_dn = tt_avdeb_dn + myRst.getFloat("valor1");
+                tt_avdeb_ch = 0 + myRst.getFloat("valor2");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* avdeb/CHEQUE
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where oper = '" + "CH' and tipo = 'DEB' and trim(LOWER(oper)) = 'av'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_avdeb_ch = tt_avdeb_ch + myRst.getFloat("valor2");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* avdeb/CHEQUE-PRE
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where oper = '" + "CP' and tipo = 'DEB' and trim(LOWER(oper)) = 'av'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_avdeb_cp = 0 + myRst.getFloat("valor2");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* avdeb/CARTAO
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where oper = '" + "CT' and tipo = 'DEB' and trim(LOWER(oper)) = 'av'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_avdeb_ct += myRst.getFloat("valor1");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* CAIXA ANTERIOR
+        tt_caixa_dn = 0;
+        tt_caixa_ch = 0;
+        tt_caixa_cp = 0;
+        tt_caixa_ct = 0;
+
+        //* CAIXA/DINHEIRO
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where oper = '" + "DN' and tipo = 'CRE' and trim(LOWER(oper)) = 'cx'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_caixa_dn = 0 + myRst.getFloat("valor1");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* CAIXA CHEQUE/DINHEIRO
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where oper = '" + "CD' and tipo = 'CRE' and trim(LOWER(oper)) = 'cx'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_caixa_dn = tt_caixa_dn + myRst.getFloat("valor1");
+                tt_caixa_ch = 0 + myRst.getFloat("valor2");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* caixa/CHEQUE
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where oper = '" + "CH' and tipo = 'CRE' and trim(LOWER(oper)) = 'cx'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_caixa_ch = tt_caixa_ch + myRst.getFloat("valor2");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* caixa/CHEQUE-PRE
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where oper = '" + "CP' and tipo = 'CRE' and trim(LOWER(oper)) = 'cx'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_caixa_cp = 0 + myRst.getFloat("valor2");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* caixa/CARTAO
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where oper = '" + "CT' and tipo = 'CRE' and trim(LOWER(oper)) = 'cx'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_caixa_ct += myRst.getFloat("valor1");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* PASSAGEM DE CAIXA
+        tt_pass_dn = 0;
+        tt_pass_ch = 0;
+        tt_pass_cp = 0;
+        tt_pass_ct = 0;
+        
+        //* PASS/DINHEIRO
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where oper = '" + "DN' and tipo = 'CRE' and trim(LOWER(oper)) = 'pc'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_pass_dn = 0 + myRst.getFloat("valor1");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* PASS CHEQUE/DINHEIRO
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where oper = '" + "CD' and tipo = 'CRE' and trim(LOWER(oper)) = 'pc'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_pass_dn = tt_pass_dn + myRst.getFloat("valor1");
+                tt_pass_ch = 0 + myRst.getFloat("valor2");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* pass/CHEQUE
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where oper = '" + "CH' and tipo = 'CRE' and trim(LOWER(oper)) = 'pc'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_pass_ch = tt_pass_ch + myRst.getFloat("valor2");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* pass/CHEQUE-PRE
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where oper = '" + "CP' and tipo = 'CRE' and trim(LOWER(oper)) = 'pc'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_pass_cp = 0 + myRst.getFloat("valor2");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* pass/CARTAO
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where oper = '" + "CT' and tipo = 'CRE' and trim(LOWER(oper)) = 'pc'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_pass_ct += myRst.getFloat("valor1");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* PASSAGEM DE CAIXA DEB
+        tt_passd_dn = 0;
+        tt_passd_ch = 0;
+        tt_passd_cp = 0;
+        tt_passd_ct = 0;
+        
+        //* PASS/DINHEIRO DEB
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where oper = '" + "DN' and tipo = 'DEB' and trim(LOWER(oper)) = 'pc'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_passd_dn = 0 + myRst.getFloat("valor1");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* PASS CHEQUE/DINHEIRO DEB
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where oper = '" + "CD' and tipo = 'DEB' and trim(LOWER(oper)) = 'pc'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_passd_dn = tt_passd_dn + myRst.getFloat("valor1");
+                tt_passd_ch = 0 + myRst.getFloat("valor2");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* pass/CHEQUE DEB
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where oper = '" + "CH' and tipo = 'DEB' and trim(LOWER(oper)) = 'pc'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_passd_ch = tt_passd_ch + myRst.getFloat("valor2");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* pass/CHEQUE-PRE DEB
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where oper = '" + "CP' and tipo = 'DEB' and trim(LOWER(oper)) = 'pc'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_passd_cp = 0 + myRst.getFloat("valor2");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* pass/CARTAO
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where oper = '" + "CT' and tipo = 'DEB' and trim(LOWER(oper)) = 'pc'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_passd_ct += myRst.getFloat("valor1");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* ADIANTAMENTO DEB
+        tt_adi_dn = 0;
+        tt_adi_ch = 0;
+        tt_adi_cp = 0;
+        tt_adi_ct = 0;
+        
+        //* ADI/DINHEIRO DEB
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where oper = '" + "DN' and tipo = 'DEB' and trim(LOWER(oper)) = 'ad'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_adi_dn += myRst.getFloat("valor1");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* ADI CHEQUE/DINHEIRO DEB
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where oper = '" + "CD' and tipo = 'DEB' and trim(LOWER(oper)) = 'ad'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_adi_dn += myRst.getFloat("valor1");
+                tt_adi_ch += myRst.getFloat("valor2");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* adi/CHEQUE DEB
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where oper = '" + "CH' and tipo = 'DEB' and trim(LOWER(oper)) = 'ad'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_adi_ch += myRst.getFloat("valor2");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* ADI/CHEQUE-PRE DEB
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where oper = '" + "CP' and tipo = 'DEB' and trim(LOWER(oper)) = 'ad'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_adi_cp +=  myRst.getFloat("valor2");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        //* ADI/CARTAO
+        sSql = "select sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) as valor1,sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as valor2, " +
+                "sum(CASE WHEN toper != 'DN' THEN 0 ELSE valor END) + sum(CASE WHEN toper = 'DN' THEN 0 ELSE valor END) as Total from ncaixa where oper = '" + "CT' and tipo = 'DEB' and trim(LOWER(oper)) = 'ad'" +
+                " AND data <= '" + dDataCaixa + "';";
+        myRst = conn.AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY);
+        try {
+            while (myRst.next()) {
+                tt_adi_ct += myRst.getFloat("valor1");
+            }
+        } catch (SQLException ex) {}
+        DbMain.FecharTabela(myRst);
+
+        return new float[][] {{tt_recibo_dn, tt_recibo_ch, tt_recibo_cp, tt_recibo_ct},
+            {tt_extrato_dn, tt_extrato_ch, tt_extrato_cp, tt_extrato_ct},
+            {tt_despesa_dn, tt_despesa_ch, tt_despesa_cp, tt_despesa_ct},
+            {tt_deposito_dn, tt_deposito_ch, tt_deposito_cp, tt_deposito_ct},
+            {tt_avcred_dn, tt_avcred_ch, tt_avcred_cp, tt_avcred_ct},
+            {tt_avdeb_dn, tt_avdeb_ch, tt_avdeb_cp, tt_avdeb_ct},
+            {tt_caixa_dn, tt_caixa_ch, tt_caixa_cp, tt_caixa_ct},
+            {tt_pass_dn, tt_pass_ch, tt_pass_cp, tt_pass_ct},
+            {tt_passd_dn, tt_passd_ch, tt_passd_cp, tt_passd_ct},
+            {tt_adi_dn, tt_adi_ch, tt_adi_cp, tt_adi_ct}};
+    }
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JFormattedTextField jCH;
     private javax.swing.JSpinner jCT;

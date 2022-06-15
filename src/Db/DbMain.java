@@ -146,6 +146,65 @@ public class DbMain {
         return hResult;
     }
 
+    public ResultSet AbrirTabela(String sqlString, int iTipo, Object[][] param) {
+        ResultSet hResult = null;
+        Connection connectionSQL = this.conn;
+
+        if (param.length <= 0) {
+            Statement stm = null;
+            try {
+                stm = connectionSQL.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, iTipo);
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+            try {
+                hResult = stm.executeQuery(sqlString);
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        } else {
+            PreparedStatement stm = null;
+            try {
+                stm = connectionSQL.prepareStatement(sqlString);
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+            try {
+                for (int i = 0; i <= param.length - 1; i++) {
+                    if (param[i][0].equals("int")) {
+                        stm.setInt(i + 1, (int) param[i][1]);
+                    } else if (param[i][0].equals("bigint")) {
+                        stm.setObject(i + 1, (BigInteger) param[i][1], Types.BIGINT);
+                    } else if (param[i][0].equals("date")) {
+                        stm.setDate(i + 1, Dates.toSqlDate(Dates.StringtoDate(param[i][1].toString(),"yyyy-MM-dd")));
+                    } else if (param[i][0].equals("time")) {
+                        stm.setTimestamp(i + 1, (Timestamp) param[i][1]);
+                    } else if (param[i][0].equals("string")) {
+                        stm.setString(i + 1, (String) param[i][1]);
+                    } else if (param[i][0].equals("decimal")) {
+                        stm.setBigDecimal(i + 1, (BigDecimal) param[i][1]);
+                    } else if (param[i][0].equals("boolean")) {
+                        stm.setBoolean(i + 1, (Boolean) param[i][1]);
+                    } else if (param[i][0].equals("float")) {
+                        stm.setFloat(i + 1, (Float) param[i][1]);
+                    } else if (param[i][0].equals("double")) {
+                        stm.setDouble(i + 1, (Double) param[i][1]);
+                    } else if (param[i][0].equals("array")) {
+                        stm.setArray(i + 1, (Array) param[i][1]);
+                    } else if (param[i][0].equals("int")) {
+                        stm.setInt(i + 1, (int) param[i][1]);
+                    }
+                }
+            } catch (SQLException e) { e.printStackTrace(); }
+            try {
+                hResult = stm.executeQuery();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        }
+        return hResult;
+    }
+
     /**
      *
      * @param hResult
@@ -209,6 +268,8 @@ public class DbMain {
                         stm.setObject(i + 1, (BigInteger) param[i][1], Types.BIGINT);
                     } else if (param[i][0].equals("date")) {
                         stm.setDate(i + 1, (Date) param[i][1]);
+                    } else if (param[i][0].equals("time")) {
+                        stm.setTimestamp(i + 1, (Timestamp) param[i][1]);
                     } else if (param[i][0].equals("string")) {
                         stm.setString(i + 1, (String) param[i][1]);
                     } else if (param[i][0].equals("decimal")) {
@@ -372,6 +433,64 @@ public class DbMain {
         return vRetorno;
     }
 
+    public Object[][] LerCamposTabela(String[] aCampos, String tbNome, String sWhere, Object[][] param) throws SQLException {
+        String sCampos = FuncoesGlobais.join(aCampos,", ");
+        String sSql = "SELECT " + sCampos + " FROM " + tbNome + " WHERE " + sWhere + " LIMIT 1";
+        ResultSet tmpResult = AbrirTabela(sSql, ResultSet.CONCUR_READ_ONLY, param);
+        ResultSetMetaData md = tmpResult.getMetaData();
+        Object[][] vRetorno = null;
+        
+        int i = 0;
+
+        while (tmpResult.next()) {
+            vRetorno = new Object[aCampos.length][4];
+            for (i=0; i<= aCampos.length - 1; i++) {
+                vRetorno[i][0] = md.getColumnName(i + 1);
+                vRetorno[i][1] =  md.getColumnTypeName(i + 1);
+
+                // Trabala field name
+                String variavel = aCampos[i].trim();
+                if (variavel.toLowerCase().contains(" as ")) {
+                    variavel = variavel.substring(variavel.toLowerCase().indexOf(" as") + 3).trim();
+                }
+                try {
+                    vRetorno[i][2] =  String.valueOf(tmpResult.getString(variavel).length());
+                } catch (NullPointerException ex) { vRetorno[i][2] = "0"; }
+
+                // Debug
+                //System.out.println(vRetorno[i][0] + "::" + vRetorno[i][1]);
+
+                try {
+                    switch (md.getColumnType(i + 1)) {
+                        case Types.VARCHAR:
+                            if (tmpResult.getString(variavel) != null) {
+                                vRetorno[i][3] = tmpResult.getString(variavel);
+                            } else vRetorno[i][3] = "";
+                            break;
+                        case Types.DATE:
+                            vRetorno[i][3] = tmpResult.getDate(variavel);
+                            break;
+                        case Types.BOOLEAN:
+                            vRetorno[i][3] = tmpResult.getBoolean(variavel);
+                            break;
+                        case Types.DECIMAL:
+                            vRetorno[i][3] = tmpResult.getBigDecimal(variavel);
+                            break;
+                        case Types.INTEGER:
+                            vRetorno[i][3] = tmpResult.getInt(variavel);
+                            break;
+                        default:
+                            vRetorno[i][3] = tmpResult.getString(variavel);
+                    }
+
+                } catch (NullPointerException ex) { vRetorno[i][3] = ""; }
+            }
+        }
+        FecharTabela(tmpResult);
+
+        return vRetorno;
+    }
+    
     public static int RecordCount(ResultSet hrs) {
         
         int retorno = 0;
@@ -593,7 +712,7 @@ public class DbMain {
             statement.setString(2, toper);
             statement.setString(3, oper);
             statement.setInt(4, pcnumero);
-            statement.setDate(5, Dates.toSqlDate(data));
+            statement.setDate(5, Dates.toSqlDate(datap));
             statement.setDate(6, Dates.toSqlDate(datap));
             statement.setString(7, bco);
             statement.setString(8, age);
@@ -609,7 +728,7 @@ public class DbMain {
             ResultSet rs = AbrirTabela(sql, ResultSet.CONCUR_READ_ONLY);
             while (rs.next()) {ret = rs.getInt("autenticacao");}
             rs.close(); rs = null;
-        } catch (SQLException e) {ret = 0;}
+        } catch (SQLException e) {e.printStackTrace(); ret = 0;}
         return ret;
     }
 

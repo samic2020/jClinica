@@ -57,10 +57,11 @@ public class jTelsCont extends javax.swing.JDialog {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle(".:: Inserir Telefone e Contato");
-        setBackground(new java.awt.Color(255, 255, 153));
+        setBackground(new java.awt.Color(101, 227, 255));
         setUndecorated(true);
         setResizable(false);
 
+        jPanel1.setBackground(new java.awt.Color(101, 227, 255));
         jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
         jLabel2.setText("Tipo:");

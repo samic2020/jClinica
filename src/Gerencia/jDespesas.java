@@ -137,11 +137,14 @@ public class jDespesas extends javax.swing.JInternalFrame {
         jValor = new javax.swing.JFormattedTextField();
         jbtLancar = new javax.swing.JButton();
 
+        setBackground(new java.awt.Color(101, 227, 255));
         setClosable(true);
         setIconifiable(true);
         setTitle(".:: Despesas");
+        setOpaque(true);
         setVisible(true);
 
+        jPanel1.setBackground(new java.awt.Color(101, 227, 255));
         jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder(javax.swing.border.EtchedBorder.RAISED));
 
         jGrupo.setModel(new javax.swing.table.DefaultTableModel(
@@ -283,12 +286,13 @@ public class jDespesas extends javax.swing.JInternalFrame {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
+        jPanel3.setBackground(new java.awt.Color(101, 227, 255));
         jPanel3.setBorder(javax.swing.BorderFactory.createEtchedBorder(javax.swing.border.EtchedBorder.RAISED));
 
         jLabel4.setBackground(new java.awt.Color(105, 109, 238));
         jLabel4.setFont(new java.awt.Font("Noto Sans", 1, 12)); // NOI18N
         jLabel4.setForeground(new java.awt.Color(254, 254, 254));
-        jLabel4.setText(" Descrição");
+        jLabel4.setText(" Descrição - <F2> - Para texto padrão de pagamento ao médico");
         jLabel4.setToolTipText("");
         jLabel4.setOpaque(true);
 
@@ -297,6 +301,11 @@ public class jDespesas extends javax.swing.JInternalFrame {
         jDescricao.setRows(5);
         jDescricao.setTabSize(4);
         jDescricao.setDoubleBuffered(true);
+        jDescricao.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                jDescricaoKeyReleased(evt);
+            }
+        });
         jScrollPane2.setViewportView(jDescricao);
 
         jLabel5.setText("Valor:");
@@ -628,6 +637,12 @@ public class jDespesas extends javax.swing.JInternalFrame {
             jDel.setEnabled(false);
         } catch (Exception e) {}
     }//GEN-LAST:event_jbtLancarActionPerformed
+
+    private void jDescricaoKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jDescricaoKeyReleased
+        if (evt.getKeyCode() == KeyEvent.VK_F2) {
+            jDescricao.setText("Pagamento ao médico, xxxxxxxxxxxxxxxxxxx, referente aos atendimentos do dia xx/xx/xxxx no valor de R$ xx,xx");
+        }
+    }//GEN-LAST:event_jDescricaoKeyReleased
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jAdc;

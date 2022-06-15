@@ -9,6 +9,9 @@
 	<parameter name="datafim" class="java.util.Date"/>
 	<parameter name="logado" class="java.lang.String"/>
 	<parameter name="cdmed" class="java.lang.Integer"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["C:\\NetBeansProjects\\jClinica_old\\reports\\"]]></defaultValueExpression>
+	</parameter>
 	<queryString>
 		<![CDATA[SELECT * FROM nparticular WHERE ma_data >= $P{datainic} and ma_data <= $P{datafim} and ma_codmedico = $P{cdmed} ORDER BY ma_medico, ma_data;]]>
 	</queryString>
@@ -98,7 +101,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="14" isBold="true" isItalic="true"/>
 				</textElement>
-				<text><![CDATA[Relatório de Atendimentos]]></text>
+				<text><![CDATA[Relatório de Atendimentos de Particulares]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="b68db72b-d91e-42d1-9c25-b9f040a6e9b3" x="417" y="20" width="33" height="20"/>
@@ -133,7 +136,7 @@
 				<textFieldExpression><![CDATA[$F{ma_data}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement uuid="7fdf7143-10d2-4cfb-a86e-759546b72f74" x="77" y="0" width="209" height="14"/>
+				<reportElement uuid="7fdf7143-10d2-4cfb-a86e-759546b72f74" x="116" y="0" width="170" height="14"/>
 				<textElement verticalAlignment="Middle">
 					<font size="8"/>
 				</textElement>
@@ -178,6 +181,13 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$F{valormed}]]></textFieldExpression>
 			</textField>
+			<textField>
+				<reportElement uuid="a8f756c2-3a30-4d07-aa1c-1f1480774104" x="77" y="2" width="34" height="12"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ma_pcnumero}]]></textFieldExpression>
+			</textField>
 		</band>
 	</detail>
 	<pageFooter>
@@ -205,7 +215,7 @@
 		</band>
 	</pageFooter>
 	<summary>
-		<band height="64">
+		<band height="91">
 			<textField pattern="000">
 				<reportElement uuid="d2cc9c78-4095-4625-b386-a66c505e752c" x="204" y="20" width="50" height="20"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
@@ -269,6 +279,20 @@
 				</textElement>
 				<text><![CDATA[Total Medico:]]></text>
 			</staticText>
+			<subreport>
+				<reportElement uuid="854098dd-8e43-4767-9412-c9ca85baf512" x="0" y="40" width="553" height="50"/>
+				<subreportParameter name="datafim">
+					<subreportParameterExpression><![CDATA[$P{datafim}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="cdmed">
+					<subreportParameterExpression><![CDATA[$P{cdmed}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="datainic">
+					<subreportParameterExpression><![CDATA[$P{datainic}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "relTaxasConv.jasper"]]></subreportExpression>
+			</subreport>
 		</band>
 	</summary>
 </jasperReport>

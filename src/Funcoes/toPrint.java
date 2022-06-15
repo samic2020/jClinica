@@ -44,7 +44,7 @@ public class toPrint {
                         defaultNamePrinterShare = tprint[2];
                     }
                 }
-            } catch (NullPointerException e) {}
+            } catch (NullPointerException e) {e.printStackTrace();}
         }
         
         if (!System.getProperty("os.name").toUpperCase().trim().equals("LINUX")) {
@@ -79,11 +79,11 @@ public class toPrint {
                     for (PrintService ps : pservices) {
                         System.out.println("Impressora Encontrada: " + ps.getName());
 
-                        //if (ps.getName().trim().contains(defaultNamePrinter.trim())) {
-                        //    System.out.println("Impressora Selecionada: " + ps.getName());
+                        if (ps.getName().trim().contains(defaultNamePrinter.trim())) {
+                            System.out.println("Impressora Selecionada: " + ps.getName());
                             impressora = ps;
                             break;
-                        //}
+                        }
                     }
                 }
                 if (impressora != null) {

@@ -34,6 +34,7 @@ public class jDesistir extends javax.swing.JDialog {
         jButton1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setBackground(new java.awt.Color(101, 227, 255));
 
         jLabel2.setText("<html><b>Quando <font color = &H0000ff>não existir</font> o motivo na caixa de seleção abaixo, favor informar ao suporte.</b></html>");
 

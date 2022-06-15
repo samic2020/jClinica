@@ -107,17 +107,21 @@ public class iRelEstatisticas extends javax.swing.JInternalFrame {
         btGerar = new javax.swing.JButton();
         btFechar = new javax.swing.JButton();
 
+        setBackground(new java.awt.Color(101, 227, 255));
         setClosable(true);
         setIconifiable(true);
         setTitle(".:: Relatório");
         setMaximumSize(null);
         setMinimumSize(null);
+        setOpaque(true);
         setVisible(true);
 
+        jPanel1.setBackground(new java.awt.Color(101, 227, 255));
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("[ Faixa Etária ]"));
         jPanel1.setMaximumSize(new java.awt.Dimension(174, 169));
         jPanel1.setMinimumSize(new java.awt.Dimension(174, 169));
 
+        fe_menor.setBackground(new java.awt.Color(101, 227, 255));
         getario.add(fe_menor);
         fe_menor.setText("Menor de XX anos");
 
@@ -132,9 +136,11 @@ public class iRelEstatisticas extends javax.swing.JInternalFrame {
             }
         });
 
+        fe_maior.setBackground(new java.awt.Color(101, 227, 255));
         getario.add(fe_maior);
         fe_maior.setText("Maior de XX anos");
 
+        fe_ambos.setBackground(new java.awt.Color(101, 227, 255));
         getario.add(fe_ambos);
         fe_ambos.setSelected(true);
         fe_ambos.setText("Ambos");
@@ -171,16 +177,20 @@ public class iRelEstatisticas extends javax.swing.JInternalFrame {
                 .addContainerGap())
         );
 
+        jPanel2.setBackground(new java.awt.Color(101, 227, 255));
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("[ Gênero ]"));
         jPanel2.setMaximumSize(new java.awt.Dimension(161, 144));
         jPanel2.setMinimumSize(new java.awt.Dimension(161, 144));
 
+        ge_masculino.setBackground(new java.awt.Color(101, 227, 255));
         ggenero.add(ge_masculino);
         ge_masculino.setText("Masculino");
 
+        ge_feminino.setBackground(new java.awt.Color(101, 227, 255));
         ggenero.add(ge_feminino);
         ge_feminino.setText("Feminino");
 
+        ge_ambos.setBackground(new java.awt.Color(101, 227, 255));
         ggenero.add(ge_ambos);
         ge_ambos.setSelected(true);
         ge_ambos.setText("Ambos");
@@ -195,7 +205,7 @@ public class iRelEstatisticas extends javax.swing.JInternalFrame {
                     .addComponent(ge_masculino)
                     .addComponent(ge_feminino)
                     .addComponent(ge_ambos))
-                .addContainerGap(47, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -209,14 +219,17 @@ public class iRelEstatisticas extends javax.swing.JInternalFrame {
                 .addContainerGap())
         );
 
+        jPanel3.setBackground(new java.awt.Color(101, 227, 255));
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder("[ Rendas ]"));
         jPanel3.setMaximumSize(new java.awt.Dimension(250, 171));
         jPanel3.setMinimumSize(new java.awt.Dimension(250, 171));
         jPanel3.setPreferredSize(new java.awt.Dimension(250, 171));
 
+        rd_familiar.setBackground(new java.awt.Color(101, 227, 255));
         grenda.add(rd_familiar);
         rd_familiar.setText("Familiar");
 
+        rd_percapta.setBackground(new java.awt.Color(101, 227, 255));
         grenda.add(rd_percapta);
         rd_percapta.setText("Per Cápta");
 
@@ -230,6 +243,7 @@ public class iRelEstatisticas extends javax.swing.JInternalFrame {
         rd_vrfinal.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         rd_vrfinal.setText("0,00");
 
+        rd_pessoal.setBackground(new java.awt.Color(101, 227, 255));
         grenda.add(rd_pessoal);
         rd_pessoal.setSelected(true);
         rd_pessoal.setText("Pessoal");
@@ -275,9 +289,10 @@ public class iRelEstatisticas extends javax.swing.JInternalFrame {
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel6)
                     .addComponent(rd_vrfinal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(13, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
+        jPanel5.setBackground(new java.awt.Color(101, 227, 255));
         jPanel5.setBorder(javax.swing.BorderFactory.createTitledBorder("[ Período ]"));
         jPanel5.setMaximumSize(new java.awt.Dimension(597, 72));
         jPanel5.setMinimumSize(new java.awt.Dimension(597, 72));

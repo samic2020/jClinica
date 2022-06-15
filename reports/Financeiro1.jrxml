@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Financeiro1" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="6928f6e0-dc4b-42b1-b879-71c2eaa96157">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="datainic" class="java.util.Date"/>
+	<parameter name="datafim" class="java.util.Date"/>
+	<parameter name="logado" class="java.lang.String"/>
+	<field name="id" class="java.lang.Integer"/>
+	<field name="data" class="java.lang.String"/>
+	<field name="codmedico" class="java.lang.Integer"/>
+	<field name="nmmedico" class="java.lang.String"/>
+	<field name="cdconvenio" class="java.lang.Integer"/>
+	<field name="nmconvenio" class="java.lang.String"/>
+	<field name="quantidade" class="java.lang.Integer"/>
+	<field name="vrconsulta" class="java.lang.Double"/>
+	<field name="vrmedico" class="java.lang.Double"/>
+	<field name="dias" class="java.lang.Integer"/>
+	<field name="vrplantao" class="java.lang.Double"/>
+	<variable name="stvrconsultas" class="java.lang.Double">
+		<variableExpression><![CDATA[$F{vrconsulta} * $F{quantidade} ]]></variableExpression>
+	</variable>
+	<variable name="sttmedico" class="java.lang.Double">
+		<variableExpression><![CDATA[$F{vrmedico} * $F{quantidade}]]></variableExpression>
+	</variable>
+	<variable name="sttclinica" class="java.lang.Double">
+		<variableExpression><![CDATA[$V{stvrconsultas} - $V{sttmedico}]]></variableExpression>
+	</variable>
+	<variable name="tsqtd" class="java.lang.Integer" resetType="Group" resetGroup="datas" calculation="Sum">
+		<variableExpression><![CDATA[$F{quantidade}]]></variableExpression>
+	</variable>
+	<variable name="sstvrconsultas" class="java.lang.Double" resetType="Group" resetGroup="datas" calculation="Sum">
+		<variableExpression><![CDATA[$V{stvrconsultas}]]></variableExpression>
+	</variable>
+	<variable name="ssttmedico" class="java.lang.Double" resetType="Group" resetGroup="datas" calculation="Sum">
+		<variableExpression><![CDATA[$V{sttmedico}]]></variableExpression>
+	</variable>
+	<variable name="ssttclinica" class="java.lang.Double" resetType="Group" resetGroup="datas" calculation="Sum">
+		<variableExpression><![CDATA[$V{sttclinica}]]></variableExpression>
+	</variable>
+	<group name="data">
+		<groupExpression><![CDATA[$F{data}]]></groupExpression>
+	</group>
+	<group name="datas">
+		<groupExpression><![CDATA[$F{data}]]></groupExpression>
+		<groupHeader>
+			<band height="34">
+				<staticText>
+					<reportElement uuid="286510dd-55f0-49ee-931b-54889689607c" x="0" y="14" width="87" height="20"/>
+					<textElement textAlignment="Right">
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[Mês Referência:]]></text>
+				</staticText>
+				<textField>
+					<reportElement uuid="3f602ecb-0436-4f40-8607-5b8adf943af2" x="93" y="14" width="133" height="20"/>
+					<textElement>
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{data}.substring( 2 )]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<group name="medicos">
+		<groupExpression><![CDATA[$F{codmedico}]]></groupExpression>
+		<groupHeader>
+			<band height="41">
+				<textField>
+					<reportElement uuid="31b9ca28-b76a-48ea-9eaf-d745bace708b" x="62" y="0" width="366" height="20"/>
+					<textElement>
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{nmmedico}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement uuid="9944d8aa-9a52-4c3f-8cc6-c321dd1bdc23" x="162" y="20" width="36" height="20"/>
+					<textElement textAlignment="Center">
+						<font isBold="true" isUnderline="true"/>
+					</textElement>
+					<text><![CDATA[Qtd]]></text>
+				</staticText>
+				<staticText>
+					<reportElement uuid="2e4a2f39-d5b0-43cf-9375-b394e3876bcf" x="203" y="21" width="52" height="20"/>
+					<textElement textAlignment="Right">
+						<font isBold="true" isUnderline="true"/>
+					</textElement>
+					<text><![CDATA[Vr.Cons]]></text>
+				</staticText>
+				<staticText>
+					<reportElement uuid="87ad9dfc-fd7f-416a-8329-351d7b857d94" x="272" y="20" width="52" height="20"/>
+					<textElement textAlignment="Right">
+						<font isBold="true" isUnderline="true"/>
+					</textElement>
+					<text><![CDATA[Tot.Cons]]></text>
+				</staticText>
+				<staticText>
+					<reportElement uuid="1c0a662a-4a08-4f81-a6f0-6adb99312e58" x="328" y="21" width="57" height="20"/>
+					<textElement textAlignment="Right">
+						<font isBold="true" isUnderline="true"/>
+					</textElement>
+					<text><![CDATA[Vr.Med]]></text>
+				</staticText>
+				<staticText>
+					<reportElement uuid="ca23301e-1ee9-4bbe-a037-9c08ff3c2bb0" x="389" y="21" width="67" height="20"/>
+					<textElement textAlignment="Right">
+						<font isBold="true" isUnderline="true"/>
+					</textElement>
+					<text><![CDATA[Tot.Med]]></text>
+				</staticText>
+				<staticText>
+					<reportElement uuid="d6f9e6c0-ffe8-4354-bf6f-dde515eabeff" x="456" y="20" width="77" height="20"/>
+					<textElement textAlignment="Right">
+						<font isBold="true" isUnderline="true"/>
+					</textElement>
+					<text><![CDATA[Tot.Clinica]]></text>
+				</staticText>
+				<staticText>
+					<reportElement uuid="aba137bc-0da6-4f8e-be19-6f20ee661834" x="0" y="1" width="57" height="19"/>
+					<textElement textAlignment="Right">
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[Médico:]]></text>
+				</staticText>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="27">
+				<textField>
+					<reportElement uuid="60114c9e-c0b7-440e-92a8-69032bf74315" x="162" y="7" width="36" height="20"/>
+					<textElement textAlignment="Center"/>
+					<textFieldExpression><![CDATA[$V{tsqtd}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement uuid="36b74c3d-57b7-45ec-abc9-d245d0ae5ce5" x="255" y="7" width="69" height="20"/>
+					<textElement textAlignment="Right"/>
+					<textFieldExpression><![CDATA[$V{sstvrconsultas}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement uuid="0b94603d-f34c-42c4-a2fc-ad21a306a2f7" x="389" y="7" width="67" height="20"/>
+					<textElement textAlignment="Right"/>
+					<textFieldExpression><![CDATA[$V{ssttmedico}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement uuid="29301470-3347-462d-aa74-7692638d74d3" x="456" y="7" width="77" height="20"/>
+					<textElement textAlignment="Right"/>
+					<textFieldExpression><![CDATA[$V{ssttclinica}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement uuid="05898a28-2512-4236-90dc-d63653decbb8" x="328" y="7" width="57" height="20"/>
+					<textElement textAlignment="Right"/>
+					<text><![CDATA[--------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement uuid="49d38a12-1c53-479d-aea7-144672bfb695" x="203" y="7" width="52" height="20"/>
+					<textElement textAlignment="Right"/>
+					<text><![CDATA[--------]]></text>
+				</staticText>
+				<staticText>
+					<reportElement uuid="187f9adb-4c90-48ed-b88f-214c2dd718f8" x="100" y="7" width="57" height="20"/>
+					<textElement textAlignment="Right"/>
+					<text><![CDATA[Totais ->]]></text>
+				</staticText>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="42" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="9a3a794a-07a5-4a03-9f56-e0b466f4af95" x="0" y="0" width="555" height="20"/>
+				<textElement textAlignment="Center">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Relatório Financeiro - Comissões]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="250db294-f81d-406b-9084-8abf12eb531a" x="0" y="20" width="555" height="16"/>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Período de " + new SimpleDateFormat("dd/MM/yyyy").format($P{datainic}) + " até " + new SimpleDateFormat("dd/MM/yyyy").format($P{datafim})]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement uuid="5162cd30-8418-424c-90e7-aefba53d784f" x="0" y="39" width="555" height="1"/>
+			</line>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="20" splitType="Stretch">
+			<textField>
+				<reportElement uuid="39f5af30-ca9e-45a6-b71b-e4f60d2b7555" x="17" y="0" width="140" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{nmconvenio}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="02b46a49-2bb0-4ac9-8167-8eb17e4e8116" x="162" y="0" width="36" height="20"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{quantidade}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement uuid="89d66bd6-e27b-4884-9196-1c4e273b7036" x="203" y="0" width="52" height="20"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$F{vrconsulta}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement uuid="a0b9241f-a62d-41bd-bbf0-3b45057efdb4" x="255" y="0" width="69" height="20"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$V{stvrconsultas}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement uuid="8f98eca3-4f20-40fe-9970-4e668f365eec" x="389" y="0" width="67" height="20"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$V{sttmedico}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement uuid="dde4262b-052f-4051-82a0-c0383a5aa681" x="456" y="0" width="77" height="20"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$V{sttclinica}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement uuid="058752aa-b251-4251-921f-43bc555fa6dd" x="328" y="0" width="57" height="20"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$F{vrmedico}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="24">
+			<line>
+				<reportElement uuid="2a761ec7-b8a7-4617-9f36-b503e1dcd7da" x="0" y="3" width="555" height="1"/>
+			</line>
+			<textField pattern="EEEEE dd MMMMM yyyy">
+				<reportElement uuid="6a3b900b-556a-49a6-84c0-92937c75991e" x="0" y="4" width="157" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="471f1e49-46eb-4d9d-8c3d-488827357ed6" x="435" y="4" width="80" height="20"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA["Página "+$V{PAGE_NUMBER}+" de"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement uuid="866e004f-3531-4853-80df-941d4eb593a8" x="515" y="4" width="40" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="39009a47-9255-464b-acfe-1e1d8fb161cd" x="273" y="4" width="100" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$P{logado}]]></textFieldExpression>
+			</textField>
+			<textField pattern="HH:mm">
+				<reportElement uuid="7cf20b4d-4382-44d4-a164-6f1f5a2b7e80" x="162" y="4" width="53" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>

@@ -110,6 +110,7 @@ public class jGrupoBusca extends javax.swing.JDialog {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle(".:: Busca de Grupos de Medicamentos");
+        setBackground(new java.awt.Color(101, 227, 255));
         setModal(true);
         setResizable(false);
 

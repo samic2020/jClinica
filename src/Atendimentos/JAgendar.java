@@ -40,6 +40,7 @@ import javax.swing.table.TableRowSorter;
 public class JAgendar extends javax.swing.JInternalFrame {
     DbMain conn = VariaveisGlobais.con;
     TableRowSorter<TableModel> sorter;
+    TableRowSorter<TableModel> sorter2;
 
     /**
      * Creates new form JAgendar
@@ -71,24 +72,38 @@ public class JAgendar extends javax.swing.JInternalFrame {
                         int nmes = jDia.getMonthChooser().getMonth();
                         int ndia = jDia.getDayChooser().getDay();
                         
-                        String sql = "DELETE FROM nagenda WHERE datahora = '%s' and cdmedico = '%s' and Upper(especialidade) = '%s';";
-                        sql = String.format(sql, 
-                            Dates.DateFormat("yyyy-MM-dd HH:mm:ss", new Date(nano, nmes, ndia,hora, minuto, 00)),
-                            mcod,
-                            nmEspecialidade
-                        );
-                        try {conn.ExecutarComando(sql);} catch (Exception ex) {}
+                        //System.out.println(Dates.toSqlTime(new Date(nano, nmes, ndia, hora, minuto,00)));
+                        
+                        String sql = "DELETE FROM nagenda WHERE datahora = ? and cdmedico = ? and Upper(especialidade) = ?;";
+                        Object[][] param = {
+                            {"time", Dates.toSqlTime(new Date(nano, nmes, ndia, hora, minuto,00))},
+                            {"int", Integer.valueOf(mcod)},
+                            {"string", nmEspecialidade}
+                        };
+                        //sql = String.format(sql, 
+                        //    Dates.DateFormat("yyyy-MM-dd HH:mm:ss", new Date(nano, nmes, ndia,hora, minuto, 00)),
+                        //    mcod,
+                        //    nmEspecialidade
+                        //);
+                        try {conn.ExecutarComando(sql, param);} catch (Exception ex) {ex.printStackTrace();}
                         
                         paciente = paciente.length() > 100 ? paciente.substring(0,100) : paciente;
                         if (!paciente.trim().equalsIgnoreCase("")) {
-                            sql = "INSERT INTO nagenda(cdmedico, especialidade, datahora, paciente) VALUES ('%s','%s','%s','%s');";
-                            sql = String.format(sql, 
-                                mcod,
-                                nmEspecialidade,
-                                Dates.DateFormat("yyyy-MM-dd HH:mm:ss", new Date(nano, nmes, ndia,hora, minuto, 00)),
-                                paciente
-                            );
-                            try {conn.ExecutarComando(sql);} catch (Exception ex) {}
+                            //sql = "INSERT INTO nagenda(cdmedico, especialidade, datahora, paciente) VALUES ('%s','%s','%s','%s');";
+                            sql = "INSERT INTO nagenda(cdmedico, especialidade, datahora, paciente) VALUES (?,?,?,?);";
+                            param = new Object[][] {
+                                {"int", Integer.valueOf(mcod)},
+                                {"string", nmEspecialidade},
+                                {"time", Dates.toSqlTime(new Date(nano, nmes, ndia, hora, minuto,00))},
+                                {"string", paciente}
+                            };
+                            //sql = String.format(sql, 
+                            //    mcod,
+                            //    nmEspecialidade,
+                            //    Dates.DateFormat("yyyy-MM-dd HH:mm:ss", new Date(nano, nmes, ndia,hora, minuto, 00)),
+                            //    paciente
+                            //);
+                            try {conn.ExecutarComando(sql, param);} catch (Exception ex) {ex.printStackTrace();}
                         }
                     }
                 }
@@ -143,7 +158,9 @@ public class JAgendar extends javax.swing.JInternalFrame {
                 TableControl.add(jHorarios, new String[][] { { Dates.DateFormat("HH:mm", new Date(nano,nmes,ndia,i,m)), "" }, { "C", "L" } }, true);
             }
         }        
-        
+        sorter2 = new TableRowSorter(jHorarios.getModel());
+        jHorarios.setRowSorter(sorter2);
+                
         if (nmEsp != null) initAgenda(tbl, Dates.DateFormat("yyyy-MM-dd", new Date(nano,nmes,ndia)), cdMed, nmEsp);
     }
     
@@ -189,13 +206,19 @@ public class JAgendar extends javax.swing.JInternalFrame {
         jPanel2 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         jHorarios = new javax.swing.JTable();
+        jLabel3 = new javax.swing.JLabel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jProcurar = new javax.swing.JTextPane();
+        btnClear = new javax.swing.JLabel();
 
+        setBackground(new java.awt.Color(101, 227, 255));
         setClosable(true);
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setIconifiable(true);
         setTitle(".:: Agenda de Consultas");
         setVisible(true);
 
+        jPanel1.setBackground(new java.awt.Color(101, 227, 255));
         jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
         jDia.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 0, 0), 1, true));
@@ -271,11 +294,13 @@ public class JAgendar extends javax.swing.JInternalFrame {
                 .addComponent(btMarcar)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btProcurar)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(86, Short.MAX_VALUE))
         );
 
+        jPanel2.setBackground(new java.awt.Color(101, 227, 255));
         jPanel2.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.LOWERED));
 
+        jHorarios.setAutoCreateRowSorter(true);
         jHorarios.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null},
@@ -311,20 +336,53 @@ public class JAgendar extends javax.swing.JInternalFrame {
             jHorarios.getColumnModel().getColumn(1).setResizable(false);
         }
 
+        jLabel3.setText("Procurar:");
+
+        jProcurar.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                jProcurarKeyReleased(evt);
+            }
+        });
+        jScrollPane2.setViewportView(jProcurar);
+
+        btnClear.setBackground(new java.awt.Color(255, 51, 51));
+        btnClear.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+        btnClear.setForeground(new java.awt.Color(255, 255, 0));
+        btnClear.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        btnClear.setText("X");
+        btnClear.setOpaque(true);
+        btnClear.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                btnClearMouseClicked(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 540, Short.MAX_VALUE)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 540, Short.MAX_VALUE)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLabel3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jScrollPane2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnClear, javax.swing.GroupLayout.PREFERRED_SIZE, 15, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 442, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 23, Short.MAX_VALUE)
+                    .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnClear, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
@@ -415,7 +473,7 @@ public class JAgendar extends javax.swing.JInternalFrame {
                     sorter.setRowFilter(null);
                 } else {
                     try {
-                        sorter.setRowFilter(RowFilter.regexFilter(jbuscar.getText().trim()));
+                        sorter.setRowFilter(RowFilter.regexFilter("(?i)" + jbuscar.getText().trim()));
                     } catch (PatternSyntaxException pse) {System.err.println("Bad regex pattern");}
                 }
             }
@@ -458,6 +516,21 @@ public class JAgendar extends javax.swing.JInternalFrame {
         JOptionPane.showInternalMessageDialog(this, panel,"Selecione o médico!",JOptionPane.PLAIN_MESSAGE);
     }//GEN-LAST:event_btProcurarActionPerformed
 
+    private void btnClearMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnClearMouseClicked
+        jProcurar.setText("");
+        jProcurar.requestFocus();
+    }//GEN-LAST:event_btnClearMouseClicked
+
+    private void jProcurarKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jProcurarKeyReleased
+        if ("".equals(jProcurar.getText().trim())) {
+            sorter2.setRowFilter(null);
+        } else {
+            try {
+                sorter2.setRowFilter(RowFilter.regexFilter("(?i)" +jProcurar.getText().trim()));
+            } catch (PatternSyntaxException pse) {System.err.println("Bad regex pattern");}
+        }
+    }//GEN-LAST:event_jProcurarKeyReleased
+
     /**
      * @param args the command line arguments
      */
@@ -496,15 +569,19 @@ public class JAgendar extends javax.swing.JInternalFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JToggleButton btMarcar;
     private javax.swing.JButton btProcurar;
+    private javax.swing.JLabel btnClear;
     private com.toedter.calendar.JCalendar jDia;
     private javax.swing.JComboBox jEspecialidades;
     private javax.swing.JTable jHorarios;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JComboBox jMedicos;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JTextPane jProcurar;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     // End of variables declaration//GEN-END:variables
 }
 

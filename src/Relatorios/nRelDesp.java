@@ -54,9 +54,11 @@ public class nRelDesp extends javax.swing.JInternalFrame {
         jdtfim = new javax.swing.JFormattedTextField();
         jbtPrint = new javax.swing.JButton();
 
+        setBackground(new java.awt.Color(101, 227, 255));
         setClosable(true);
         setIconifiable(true);
         setTitle(".:: Relatório de Despesas");
+        setOpaque(true);
         setVisible(true);
 
         jLabel1.setText("Período:");

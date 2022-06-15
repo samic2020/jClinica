@@ -102,23 +102,28 @@ public class jQuestionario extends javax.swing.JDialog {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle(".:: Questionário");
+        setBackground(new java.awt.Color(101, 227, 255));
         setModal(true);
         setResizable(false);
 
         jLabel33.setText("1 - Frequenta a Escola?");
 
+        escSim.setBackground(new java.awt.Color(101, 227, 255));
         grupoEscola.add(escSim);
         escSim.setText("Sim");
 
+        escNao.setBackground(new java.awt.Color(101, 227, 255));
         grupoEscola.add(escNao);
         escNao.setText("Não");
 
+        formNao.setBackground(new java.awt.Color(101, 227, 255));
         grupoFormal.add(formNao);
         formNao.setText("Não");
 
         org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, trabSim, org.jdesktop.beansbinding.ELProperty.create("${selected}"), formNao, org.jdesktop.beansbinding.BeanProperty.create("enabled"));
         bindingGroup.addBinding(binding);
 
+        benefNao.setBackground(new java.awt.Color(101, 227, 255));
         grupoBeneficio.add(benefNao);
         benefNao.setText("Não");
         benefNao.addActionListener(new java.awt.event.ActionListener() {
@@ -129,6 +134,7 @@ public class jQuestionario extends javax.swing.JDialog {
 
         jLabel40.setText("4 -Já fez uso de alguma substância lícita ou ilícita?   Entendendo  que seja qualquer tipo de droga lícita ou ilícita (cigarro, álcool, maconha, cocaína, crack e outras)");
 
+        benefSim.setBackground(new java.awt.Color(101, 227, 255));
         grupoBeneficio.add(benefSim);
         benefSim.setText("Sim");
         benefSim.addActionListener(new java.awt.event.ActionListener() {
@@ -137,6 +143,7 @@ public class jQuestionario extends javax.swing.JDialog {
             }
         });
 
+        drogSim.setBackground(new java.awt.Color(101, 227, 255));
         grupoDrogas.add(drogSim);
         drogSim.setText("Sim");
         drogSim.addActionListener(new java.awt.event.ActionListener() {
@@ -147,6 +154,7 @@ public class jQuestionario extends javax.swing.JDialog {
 
         jLabel36.setText("2 - Recebe algum benefício?   Entendendo que seja qualquer benefício: PBF, BPC, aposentadoria, auxilio para idosos da Caixa e auxilio para bolsa da Caixa");
 
+        drogNao.setBackground(new java.awt.Color(101, 227, 255));
         grupoDrogas.add(drogNao);
         drogNao.setText("Não");
         drogNao.addActionListener(new java.awt.event.ActionListener() {
@@ -167,14 +175,17 @@ public class jQuestionario extends javax.swing.JDialog {
 
         jLabel38.setText("3 - Trabalha?");
 
+        trabSim.setBackground(new java.awt.Color(101, 227, 255));
         grupoTrabalho.add(trabSim);
         trabSim.setText("Sim");
 
+        trabNao.setBackground(new java.awt.Color(101, 227, 255));
         grupoTrabalho.add(trabNao);
         trabNao.setText("Não");
 
         jLabel39.setText("Formal?");
 
+        formSim.setBackground(new java.awt.Color(101, 227, 255));
         grupoFormal.add(formSim);
         formSim.setText("Sim");
 

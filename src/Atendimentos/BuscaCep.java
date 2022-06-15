@@ -51,6 +51,7 @@ public class BuscaCep extends javax.swing.JDialog {
         jbtBuscar = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setBackground(new java.awt.Color(101, 227, 255));
         setPreferredSize(new java.awt.Dimension(870, 378));
 
         tblCEPS.setModel(new javax.swing.table.DefaultTableModel(

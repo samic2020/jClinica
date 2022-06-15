@@ -170,6 +170,7 @@ public class jFichaPaciente extends javax.swing.JDialog {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle(".:: Cadastro de Pacientes");
+        setBackground(new java.awt.Color(101, 227, 255));
 
         jLabel7.setText("RG:");
 
@@ -1454,11 +1455,11 @@ public class jFichaPaciente extends javax.swing.JDialog {
           trendaper = rs.getString("pc_rendaper");
         }
         catch (Exception e) {}
-        ResultSet oldatd = conn.AbrirTabela("select * from faturar where ma_consulta = 1 and ma_pcnumero = " + nFicha + " order by ma_data desc limit 4", 1007);
+        ResultSet oldatd = conn.AbrirTabela("select * from faturar where (ma_consulta = 1 or ma_revisao = 1) and ma_pcnumero = " + nFicha + " order by ma_data desc limit 4", 1007);
         try
         {
           while (oldatd.next()) {
-            pUltConsultas.addItem(Dates.DateFormat("dd-MM-yyyy", oldatd.getDate("ma_data")) + " - " + oldatd.getString("ma_medico").toUpperCase());
+            pUltConsultas.addItem(Dates.DateFormat("dd-MM-yyyy", oldatd.getDate("ma_data")) + " - " + oldatd.getString("ma_medico").toUpperCase() + " = " + (oldatd.getBoolean("ma_consulta") ? "CONSULTA" : "REVISAO"));
           }
         }
         catch (Exception e) {}

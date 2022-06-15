@@ -127,6 +127,7 @@ public class AdmGrupos extends javax.swing.JInternalFrame {
         pbMedicamentos = new javax.swing.JProgressBar();
         pbGrupos = new javax.swing.JProgressBar();
 
+        setBackground(new java.awt.Color(101, 227, 255));
         setClosable(true);
         setForeground(java.awt.Color.lightGray);
         setIconifiable(true);
@@ -135,6 +136,7 @@ public class AdmGrupos extends javax.swing.JInternalFrame {
         setMaximumSize(new java.awt.Dimension(730, 524));
         setMinimumSize(new java.awt.Dimension(730, 524));
         setName("AdmGrupos"); // NOI18N
+        setOpaque(true);
         setVisible(true);
 
         Grupos.setModel(new javax.swing.table.DefaultTableModel(
@@ -197,6 +199,7 @@ public class AdmGrupos extends javax.swing.JInternalFrame {
                 .addComponent(gBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
+        jPanel2.setBackground(new java.awt.Color(101, 227, 255));
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("[ Opções ]"));
 
         btnAdc.setBackground(new java.awt.Color(51, 255, 51));
@@ -233,6 +236,7 @@ public class AdmGrupos extends javax.swing.JInternalFrame {
             }
         });
 
+        pnlTrocar.setBackground(new java.awt.Color(101, 227, 255));
         pnlTrocar.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "[ Mover para ... ]", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
 
         org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, tgbTrocar, org.jdesktop.beansbinding.ELProperty.create("${selected}"), pnlTrocar, org.jdesktop.beansbinding.BeanProperty.create("enabled"));

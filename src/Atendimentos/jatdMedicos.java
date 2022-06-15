@@ -47,6 +47,7 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.view.JRViewer;
 import static java.lang.Thread.sleep;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -64,7 +65,13 @@ public class jatdMedicos extends javax.swing.JInternalFrame {
     public jatdMedicos() {
         initComponents();
 
-        //new Thread() {public void run() {new MultiThreadChatClient().main(new String[] { VariaveisGlobais.logado, "med", VariaveisGlobais.unidade, "" });}}.start();
+        // Comunicação com jsmcserver
+//        new Thread() {
+//            public void run() {
+//                new MultiThreadChatClient().main(new String[] { VariaveisGlobais.logado, "med", VariaveisGlobais.unidade, "" });
+//            }
+//        }.start();
+        
         jbtRecSalvar.setVisible(false);
 
         limpartela();
@@ -76,6 +83,8 @@ public class jatdMedicos extends javax.swing.JInternalFrame {
         new Thread() {public void run() { initPac(); }}.start();
         addPopupMenu(jtxtSintomasDia);
         jtxtSintomasDia.setLineWrap(true);
+        
+        this.setSize(918, 601);
     }
 
     private void addPopupMenu(JTextArea ta) {
@@ -346,6 +355,7 @@ public class jatdMedicos extends javax.swing.JInternalFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jPanel11 = new javax.swing.JPanel();
         jtbbLancamentos = new javax.swing.JTabbedPane();
         jPanel5 = new javax.swing.JPanel();
         jPanel7 = new javax.swing.JPanel();
@@ -363,14 +373,11 @@ public class jatdMedicos extends javax.swing.JInternalFrame {
         jScrollPane3 = new javax.swing.JScrollPane();
         jScrollPane5 = new javax.swing.JScrollPane();
         jtxtReceita = new javax.swing.JTextArea();
-        jPanel10 = new javax.swing.JPanel();
-        btAtender = new javax.swing.JButton();
-        btEncerrar = new javax.swing.JButton();
-        brPender = new javax.swing.JButton();
-        btCancelar = new javax.swing.JButton();
-        btProximo = new javax.swing.JButton();
-        btAnterior = new javax.swing.JButton();
-        btSair = new javax.swing.JButton();
+        jPanel9 = new javax.swing.JPanel();
+        jLabel2 = new javax.swing.JLabel();
+        mEsperas = new javax.swing.JLabel();
+        mPendente = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
         jtbbMaster = new javax.swing.JTabbedPane();
         jPanel1 = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
@@ -413,33 +420,50 @@ public class jatdMedicos extends javax.swing.JInternalFrame {
         mPessoas = new javax.swing.JLabel();
         mPai = new javax.swing.JLabel();
         mMae = new javax.swing.JLabel();
-        jPanel9 = new javax.swing.JPanel();
-        jLabel2 = new javax.swing.JLabel();
-        mEsperas = new javax.swing.JLabel();
-        mPendente = new javax.swing.JLabel();
-        jLabel5 = new javax.swing.JLabel();
+        jPanel10 = new javax.swing.JPanel();
+        btAtender = new javax.swing.JButton();
+        btEncerrar = new javax.swing.JButton();
+        brPender = new javax.swing.JButton();
+        btCancelar = new javax.swing.JButton();
+        btProximo = new javax.swing.JButton();
+        btAnterior = new javax.swing.JButton();
+        btSair = new javax.swing.JButton();
         jbtFichaPac = new javax.swing.JButton();
 
+        setBackground(new java.awt.Color(204, 255, 204));
+        setClosable(true);
+        setMaximizable(true);
+        setTitle(".:: Atendimento Médico ");
+        setMaximumSize(new java.awt.Dimension(918, 601));
+        setMinimumSize(new java.awt.Dimension(918, 601));
+        setPreferredSize(new java.awt.Dimension(918, 601));
         setVisible(true);
         addInternalFrameListener(new javax.swing.event.InternalFrameListener() {
-            public void internalFrameOpened(javax.swing.event.InternalFrameEvent evt) {
-            }
-            public void internalFrameClosing(javax.swing.event.InternalFrameEvent evt) {
+            public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
             }
             public void internalFrameClosed(javax.swing.event.InternalFrameEvent evt) {
                 formInternalFrameClosed(evt);
             }
-            public void internalFrameIconified(javax.swing.event.InternalFrameEvent evt) {
-            }
-            public void internalFrameDeiconified(javax.swing.event.InternalFrameEvent evt) {
-            }
-            public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
+            public void internalFrameClosing(javax.swing.event.InternalFrameEvent evt) {
             }
             public void internalFrameDeactivated(javax.swing.event.InternalFrameEvent evt) {
             }
+            public void internalFrameDeiconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameIconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameOpened(javax.swing.event.InternalFrameEvent evt) {
+            }
         });
+        getContentPane().setLayout(new java.awt.GridBagLayout());
 
-        jPanel7.setBackground(new java.awt.Color(125, 214, 234));
+        jPanel11.setBackground(new java.awt.Color(204, 255, 204));
+
+        jtbbLancamentos.setBackground(new java.awt.Color(204, 255, 204));
+
+        jPanel5.setBackground(new java.awt.Color(204, 255, 204));
+
+        jPanel7.setBackground(new java.awt.Color(148, 234, 125));
         jPanel7.setBorder(javax.swing.BorderFactory.createEtchedBorder(new java.awt.Color(5, 16, 157), null));
 
         jtxtSintomasDia.setColumns(5);
@@ -480,7 +504,7 @@ public class jatdMedicos extends javax.swing.JInternalFrame {
             .addGroup(jPanel7Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 745, Short.MAX_VALUE)
+                    .addComponent(jScrollPane2)
                     .addGroup(jPanel7Layout.createSequentialGroup()
                         .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -524,6 +548,8 @@ public class jatdMedicos extends javax.swing.JInternalFrame {
         );
 
         jtbbLancamentos.addTab("Sintomas", jPanel5);
+
+        jPanel6.setBackground(new java.awt.Color(204, 255, 204));
 
         jPanel8.setBackground(new java.awt.Color(148, 234, 125));
         jPanel8.setBorder(javax.swing.BorderFactory.createEtchedBorder(new java.awt.Color(5, 16, 157), null));
@@ -569,7 +595,7 @@ public class jatdMedicos extends javax.swing.JInternalFrame {
                     .addComponent(jScrollPane3)
                     .addGroup(jPanel8Layout.createSequentialGroup()
                         .addComponent(jbtRecApagar)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 538, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 479, Short.MAX_VALUE)
                         .addComponent(jbtRecSalvar)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jbtRecPrint)))
@@ -607,93 +633,55 @@ public class jatdMedicos extends javax.swing.JInternalFrame {
 
         jtbbLancamentos.addTab("Receituário", jPanel6);
 
-        jPanel10.setBackground(new java.awt.Color(198, 255, 180));
-        jPanel10.setBorder(javax.swing.BorderFactory.createEtchedBorder(javax.swing.border.EtchedBorder.RAISED));
+        jPanel9.setBackground(new java.awt.Color(233, 255, 233));
+        jPanel9.setBorder(javax.swing.BorderFactory.createEtchedBorder(javax.swing.border.EtchedBorder.RAISED));
 
-        btAtender.setText("Atender");
-        btAtender.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btAtenderActionPerformed(evt);
-            }
-        });
+        jLabel2.setText("<html><b>Paciênte(s) em Espera:</b></html>");
+        jLabel2.setVerticalTextPosition(javax.swing.SwingConstants.TOP);
 
-        btEncerrar.setText("Encerrar");
-        btEncerrar.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btEncerrarActionPerformed(evt);
-            }
-        });
+        mEsperas.setFont(new java.awt.Font("Ubuntu", 1, 18)); // NOI18N
+        mEsperas.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        mEsperas.setText("000000");
+        mEsperas.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
-        brPender.setText("Pender");
-        brPender.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                brPenderActionPerformed(evt);
-            }
-        });
+        mPendente.setFont(new java.awt.Font("Ubuntu", 1, 18)); // NOI18N
+        mPendente.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        mPendente.setText("000000");
+        mPendente.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
-        btCancelar.setText("Cancelar");
-        btCancelar.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btCancelarActionPerformed(evt);
-            }
-        });
+        jLabel5.setText("<html><b>Pendente(s):</b></html>");
+        jLabel5.setVerticalTextPosition(javax.swing.SwingConstants.TOP);
 
-        btProximo.setText("Próximo");
-        btProximo.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btProximoActionPerformed(evt);
-            }
-        });
-
-        btAnterior.setText("Anterior");
-        btAnterior.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btAnteriorActionPerformed(evt);
-            }
-        });
-
-        btSair.setText("Sair");
-        btSair.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btSairActionPerformed(evt);
-            }
-        });
-
-        javax.swing.GroupLayout jPanel10Layout = new javax.swing.GroupLayout(jPanel10);
-        jPanel10.setLayout(jPanel10Layout);
-        jPanel10Layout.setHorizontalGroup(
-            jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel10Layout.createSequentialGroup()
+        javax.swing.GroupLayout jPanel9Layout = new javax.swing.GroupLayout(jPanel9);
+        jPanel9.setLayout(jPanel9Layout);
+        jPanel9Layout.setHorizontalGroup(
+            jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel9Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btAtender, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btEncerrar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(brPender, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btCancelar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btProximo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btAnterior, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btSair, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addComponent(mEsperas, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel5)
+                    .addComponent(mPendente, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
-        jPanel10Layout.setVerticalGroup(
-            jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel10Layout.createSequentialGroup()
+        jPanel9Layout.setVerticalGroup(
+            jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel9Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(btAtender, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btEncerrar, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(mEsperas, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 10, Short.MAX_VALUE)
+                .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(brPender, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(btCancelar, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(12, 12, 12)
-                .addComponent(btProximo)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btAnterior)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 19, Short.MAX_VALUE)
-                .addComponent(btSair)
-                .addGap(18, 18, 18))
+                .addComponent(mPendente, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
+
+        jtbbMaster.setBackground(new java.awt.Color(204, 255, 204));
+
+        jPanel1.setBackground(new java.awt.Color(204, 255, 204));
 
         jPanel3.setBorder(javax.swing.BorderFactory.createEtchedBorder(new java.awt.Color(248, 255, 0), null));
 
@@ -714,7 +702,7 @@ public class jatdMedicos extends javax.swing.JInternalFrame {
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 769, Short.MAX_VALUE)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 742, Short.MAX_VALUE)
             .addComponent(jbarra, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         jPanel3Layout.setVerticalGroup(
@@ -744,6 +732,9 @@ public class jatdMedicos extends javax.swing.JInternalFrame {
 
         jtbbMaster.addTab("Lista de Espera", jPanel1);
 
+        jPanel2.setBackground(new java.awt.Color(204, 255, 204));
+
+        jPanel4.setBackground(new java.awt.Color(204, 255, 204));
         jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(new java.awt.Color(36, 189, 1), null), "Ficha [000000]", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Dialog", 1, 14))); // NOI18N
 
         jLabel6.setFont(new java.awt.Font("Ubuntu", 1, 14)); // NOI18N
@@ -1073,62 +1064,103 @@ public class jatdMedicos extends javax.swing.JInternalFrame {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(28, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
                 .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(0, 4, Short.MAX_VALUE))
         );
 
         jtbbMaster.addTab("Dados do Paciênte em Atendimento", jPanel2);
 
-        jPanel9.setBackground(new java.awt.Color(255, 250, 180));
-        jPanel9.setBorder(javax.swing.BorderFactory.createEtchedBorder(javax.swing.border.EtchedBorder.RAISED));
+        jPanel10.setBackground(new java.awt.Color(233, 255, 233));
+        jPanel10.setBorder(javax.swing.BorderFactory.createEtchedBorder(javax.swing.border.EtchedBorder.RAISED));
 
-        jLabel2.setText("<html><b>Paciênte(s) em Espera:</b></html>");
-        jLabel2.setVerticalTextPosition(javax.swing.SwingConstants.TOP);
+        btAtender.setText("Atender");
+        btAtender.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btAtenderActionPerformed(evt);
+            }
+        });
 
-        mEsperas.setFont(new java.awt.Font("Ubuntu", 1, 18)); // NOI18N
-        mEsperas.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        mEsperas.setText("000000");
-        mEsperas.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        btEncerrar.setText("Encerrar");
+        btEncerrar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btEncerrarActionPerformed(evt);
+            }
+        });
 
-        mPendente.setFont(new java.awt.Font("Ubuntu", 1, 18)); // NOI18N
-        mPendente.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        mPendente.setText("000000");
-        mPendente.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        brPender.setText("Pender");
+        brPender.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                brPenderActionPerformed(evt);
+            }
+        });
 
-        jLabel5.setText("<html><b>Pendente(s):</b></html>");
-        jLabel5.setVerticalTextPosition(javax.swing.SwingConstants.TOP);
+        btCancelar.setText("Cancelar");
+        btCancelar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btCancelarActionPerformed(evt);
+            }
+        });
 
-        javax.swing.GroupLayout jPanel9Layout = new javax.swing.GroupLayout(jPanel9);
-        jPanel9.setLayout(jPanel9Layout);
-        jPanel9Layout.setHorizontalGroup(
-            jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel9Layout.createSequentialGroup()
+        btProximo.setText("Próximo");
+        btProximo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btProximoActionPerformed(evt);
+            }
+        });
+
+        btAnterior.setText("Anterior");
+        btAnterior.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btAnteriorActionPerformed(evt);
+            }
+        });
+
+        btSair.setText("Sair");
+        btSair.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btSairActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel10Layout = new javax.swing.GroupLayout(jPanel10);
+        jPanel10.setLayout(jPanel10Layout);
+        jPanel10Layout.setHorizontalGroup(
+            jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel10Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(mEsperas, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel5)
-                    .addComponent(mPendente, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(btAtender, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btEncerrar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(brPender, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btCancelar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btProximo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btAnterior, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btSair, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
-        jPanel9Layout.setVerticalGroup(
-            jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel9Layout.createSequentialGroup()
+        jPanel10Layout.setVerticalGroup(
+            jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel10Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btAtender, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(mEsperas, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 10, Short.MAX_VALUE)
-                .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btEncerrar, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(mPendente, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addComponent(brPender, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btCancelar, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(12, 12, 12)
+                .addComponent(btProximo)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btAnterior)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 19, Short.MAX_VALUE)
+                .addComponent(btSair)
+                .addGap(18, 18, 18))
         );
 
         jbtFichaPac.setText("Ficha Paciênte");
@@ -1138,38 +1170,40 @@ public class jatdMedicos extends javax.swing.JInternalFrame {
             }
         });
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
+        javax.swing.GroupLayout jPanel11Layout = new javax.swing.GroupLayout(jPanel11);
+        jPanel11.setLayout(jPanel11Layout);
+        jPanel11Layout.setHorizontalGroup(
+            jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel11Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jtbbMaster)
-                    .addComponent(jtbbLancamentos))
+                .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jtbbMaster, javax.swing.GroupLayout.PREFERRED_SIZE, 771, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jtbbLancamentos, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jPanel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jbtFichaPac, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jbtFichaPac))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
+        jPanel11Layout.setVerticalGroup(
+            jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel11Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
+                .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel11Layout.createSequentialGroup()
                         .addComponent(jPanel9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(23, 23, 23)
                         .addComponent(jbtFichaPac))
                     .addComponent(jtbbMaster, javax.swing.GroupLayout.PREFERRED_SIZE, 242, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jtbbLancamentos, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jPanel10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
+
+        getContentPane().add(jPanel11, new java.awt.GridBagConstraints());
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -1301,8 +1335,9 @@ public class jatdMedicos extends javax.swing.JInternalFrame {
             } catch (Exception e) {}
         }
         try {
-          conn.ExecutarComando("DELETE FROM sintomas WHERE pc_numero = " + cdpac + " AND st_data = '" + Dates.DateFormat("yyyy-MM-dd", new Date()) + "';");
-
+          conn.ExecutarComando("DELETE FROM sintomas WHERE pc_numero = " + cdpac + " AND st_nmmedico = '"  + VariaveisGlobais.nmmedico.toUpperCase() + "' AND st_data = '" + Dates.DateFormat("yyyy-MM-dd", new Date()) + "';");
+          //conn.ExecutarComando("DELETE FROM sintomas WHERE pc_numero = " + cdpac + " AND st_data = '" + Dates.DateFormat("yyyy-MM-dd", new Date()) + "';");
+          
           String iSql = "INSERT INTO sintomas (st_sintoma, pc_numero, st_data, st_hora, st_nmmedico, st_cddoenca) VALUES ('" + jtxtSintomasDia.getText() + "'," + cdpac + ",'" + Dates.DateFormat("yyyy-MM-dd", new Date()) + "',to_timestamp('" + Dates.DateFormat("yyyy-MM-dd hh:mm:ss", new Date()) + "', 'YYYY/MM/DD HH:MI')" + ",'" + VariaveisGlobais.nmmedico.toUpperCase() + "','" + cdDoenca.getText() + "');";
 
           conn.ExecutarComando(iSql);
@@ -1375,7 +1410,8 @@ public class jatdMedicos extends javax.swing.JInternalFrame {
           conn.ExecutarComando("update marcar set ma_status = 3 where upper(ma_origem) = '" + VariaveisGlobais.origem.toUpperCase() + "' and (ma_consulta = 1 or ma_revisao = 1 or ma_cortesia = 1) and ma_codmedico = " + VariaveisGlobais.cdmedico + " and ma_pcnumero = " + cdpac + ";");
         } catch (Exception e) {}
         try {
-          conn.ExecutarComando("DELETE FROM sintomas WHERE pc_numero = " + cdpac + " AND st_data = '" + Dates.DateFormat("yyyy-MM-dd", new Date()) + "';");
+          conn.ExecutarComando("DELETE FROM sintomas WHERE pc_numero = " + cdpac + " AND st_nmmedico = '"  + VariaveisGlobais.nmmedico.toUpperCase() + "' AND st_data = '" + Dates.DateFormat("yyyy-MM-dd", new Date()) + "';");            
+          //conn.ExecutarComando("DELETE FROM sintomas WHERE pc_numero = " + cdpac + " AND st_data = '" + Dates.DateFormat("yyyy-MM-dd", new Date()) + "';");
 
           String iSql = "INSERT INTO sintomas (st_sintoma, pc_numero, st_data, st_hora, st_nmmedico, st_cddoenca) VALUES ('" + jtxtSintomasDia.getText() + "'," + cdpac + ",'" + Dates.DateFormat("yyyy-MM-dd", new Date()) + "',to_timestamp('" + Dates.DateFormat("yyyy-MM-dd hh:mm:ss", new Date()) + "', 'YYYY/MM/DD HH:MI')" + ",'" + VariaveisGlobais.nmmedico.toUpperCase() + "','" + cdDoenca.getText() + "');";
 
@@ -1505,10 +1541,14 @@ public class jatdMedicos extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_btSairActionPerformed
 
     private void clvEsperaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_clvEsperaMouseClicked
+        try {
         int row = clvEspera.getSelectedRow();
         String cdpac = clvEspera.getModel().getValueAt(row, 0).toString().trim();
 
         LerDadosPac(cdpac);
+        } catch (Exception e) {
+            limpartela();
+        }                
     }//GEN-LAST:event_clvEsperaMouseClicked
 
     private void clvEsperaKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_clvEsperaKeyReleased
@@ -1577,6 +1617,7 @@ public class jatdMedicos extends javax.swing.JInternalFrame {
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel10;
+    private javax.swing.JPanel jPanel11;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
@@ -1647,29 +1688,37 @@ public class jatdMedicos extends javax.swing.JInternalFrame {
   
   private void GerarFichaPac(String cdpac)
   {
-    String query = "select p.pc_inscricao, p.pc_nome, p.pc_nascimento, extract(year from age(pc_nascimento)) AS idade, p.pc_nacionalidade, p.pc_profissao, p.pc_numero, p.pc_nome, p.pc_endereco, p.pc_bairro, p.pc_cidade, p.pc_estado, p.pc_cep, p.pc_naturalidade, p.pc_mae, p.pc_pai, p.pc_estadocivil, p.pc_sexo, p.pc_cor, p.pc_convenio, p.pc_renda, p.pc_pessoas, s.st_sintoma, s.st_data, s.st_hora, s.st_nmmedico FROM pacientes p, sintomas s WHERE (p.pc_numero = s.pc_numero) AND p.pc_numero = Cast('" + cdpac + "' AS double precision) " + "ORDER BY s.st_data DESC;";
+    String query = "select p.pc_inscricao, p.pc_nome, p.pc_nascimento, " + 
+                   "extract(year from age(pc_nascimento)) AS idade, " + 
+                   "p.pc_nacionalidade, p.pc_profissao, p.pc_numero, p.pc_nome, " + 
+                   "p.pc_endereco, p.pc_bairro, p.pc_cidade, p.pc_estado, " + 
+                   "p.pc_cep, p.pc_naturalidade, p.pc_mae, p.pc_pai, " + 
+                   "p.pc_estadocivil, p.pc_sexo, p.pc_cor, p.pc_convenio, " + 
+                   "p.pc_renda, p.pc_pessoas, s.st_sintoma, s.st_data, " + 
+                   "s.st_hora, s.st_nmmedico FROM pacientes p, sintomas s WHERE " + 
+                   "(p.pc_numero = s.pc_numero) AND p.pc_numero = Cast('" + 
+                   cdpac + "' AS double precision) " + "ORDER BY s.st_data DESC;";
     
-    ResultSet rs = conn.AbrirTabela(query, 1007);
-    
-    JRResultSetDataSource jrRS = new JRResultSetDataSource(rs);
-    
-    String fileName = "./reports/rFichaPac.jasper";
-    
-    Map parametros = new HashMap();
-    parametros.put("pc_numero", cdpac);
-    
-    InputStream urlSubReportFaturas = Report.class.getResourceAsStream("reports/rFichaPac_receitas.jasper");
-    parametros.put("SUB_REPORT", urlSubReportFaturas);
-    try
-    {
-      JasperPrint print = JasperFillManager.fillReport(fileName, parametros, jrRS);
-      viewReportFrame("Ficha do Paci��nte", print);
+    ResultSet rs = conn.AbrirTabela(query, ResultSet.CONCUR_READ_ONLY);
+    if (conn.RecordCount(rs) > 0) {
+        JRResultSetDataSource jrRS = new JRResultSetDataSource(rs);
+
+        String fileName = "./reports/rFichaPac.jasper";
+
+        Map parametros = new HashMap();
+        parametros.put("pc_numero", cdpac);
+
+        InputStream urlSubReportFaturas = Report.class.getResourceAsStream("reports/rFichaPac_receitas.jasper");
+        parametros.put("SUB_REPORT", urlSubReportFaturas);
+        try
+        {
+          JasperPrint print = JasperFillManager.fillReport(fileName, parametros, jrRS);
+          viewReportFrame("Ficha do Paci��nte", print);
+        } catch (Exception ex) { ex.printStackTrace();}
+        DbMain.FecharTabela(rs);
+    } else {
+        JOptionPane.showMessageDialog(this, "Paciente não possui ficha.", "Atenção!!!", 1);
     }
-    catch (Exception ex)
-    {
-      ex.printStackTrace();
-    }
-    DbMain.FecharTabela(rs);
   }
   
   private static void viewReportFrame(String titulo, JasperPrint print)
@@ -1729,7 +1778,7 @@ public class jatdMedicos extends javax.swing.JInternalFrame {
       
       jtxtReceita.setText(LerDadosPacReceita(cdpac));
       
-      int pos = TableControl.seek(clvEspera, 0, cdpac);
+      int pos = TableControl.seek(clvEspera, 0, cdpac,1);
       if (pos > -1) {
         clvEspera.changeSelection(pos, 0, false, false);
       }
@@ -2173,23 +2222,19 @@ public class jatdMedicos extends javax.swing.JInternalFrame {
     }
   }
   
-  private void Desistiu(String cdpac)
-  {
-    int row = TableControl.seek(clvEspera, 0, cdpac);
-    
+  private void Desistiu(String cdpac) {
+    limpartela();
+    int row = TableControl.seek(clvEspera, 0, cdpac);    
     TableControl.del(clvEspera, row);
     
     int[] tep = contapac();
     mEsperas.setText(FuncoesGlobais.nStrZero(tep[0], 6));
     mPendente.setText(FuncoesGlobais.nStrZero(tep[1], 6));
     jbarra.setVisible(false);
-    if ((btAtender.isEnabled()) && (mNome.getText().trim().equalsIgnoreCase("")))
-    {
+    if ((btAtender.isEnabled()) && (mNome.getText().trim().equalsIgnoreCase(""))) {
       String pp = proximopac();
       if (!pp.equalsIgnoreCase("")) {
         LerDadosPac(pp);
-      } else {
-        limpartela();
       }
       jtbbMaster.setSelectedIndex(1);
       

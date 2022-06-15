@@ -6,10 +6,30 @@
 package Gerencia;
 
 import Db.DbMain;
+import Funcoes.Collections;
 import Funcoes.Dates;
+import Funcoes.FuncoesGlobais;
 import Funcoes.LerValor;
 import static Funcoes.LerValor.String2Db;
+import Funcoes.Pad;
+import Funcoes.ResizeImageIcon;
 import Funcoes.VariaveisGlobais;
+import Funcoes.jPDF;
+import Funcoes.toPrint;
+import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.Chunk;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.Rectangle;
+import com.itextpdf.text.pdf.BarcodeInter25;
+import com.itextpdf.text.pdf.BaseFont;
+import com.itextpdf.text.pdf.PdfContentByte;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.draw.LineSeparator;
+import com.lowagie.text.Element;
+import java.awt.Color;
+import java.awt.Image;
 import java.awt.event.KeyEvent;
 import java.math.BigDecimal;
 import java.util.Date;
@@ -57,9 +77,11 @@ public class jPasCaixa extends javax.swing.JInternalFrame {
         jETA = new javax.swing.JRadioButton();
         jETD = new javax.swing.JRadioButton();
 
+        setBackground(new java.awt.Color(101, 227, 255));
         setClosable(true);
         setIconifiable(true);
         setTitle(".:: Lançamento Caixa");
+        setOpaque(true);
         setVisible(true);
 
         jLabel1.setText("Valor:");
@@ -82,8 +104,10 @@ public class jPasCaixa extends javax.swing.JInternalFrame {
             }
         });
 
+        jPanel2.setBackground(new java.awt.Color(101, 227, 255));
         jPanel2.setBorder(javax.swing.BorderFactory.createEtchedBorder(javax.swing.border.EtchedBorder.RAISED));
 
+        jETA.setBackground(new java.awt.Color(101, 227, 255));
         buttonGroup1.add(jETA);
         jETA.setText("Saida");
         jETA.addActionListener(new java.awt.event.ActionListener() {
@@ -92,6 +116,7 @@ public class jPasCaixa extends javax.swing.JInternalFrame {
             }
         });
 
+        jETD.setBackground(new java.awt.Color(101, 227, 255));
         buttonGroup1.add(jETD);
         jETD.setSelected(true);
         jETD.setText("Entrada");
@@ -188,12 +213,196 @@ public class jPasCaixa extends javax.swing.JInternalFrame {
                 Integer.valueOf(VariaveisGlobais.cdlogado)
         );
         if (aut == 0) return;
+        
+        String nvrconsulta = jValor.getText();
+        ImprimePassCaixaPDF(aut, new String[][] {{"","","","",nvrconsulta,"DN","PC","",""}}, "", nvrconsulta, "P A S S A G E M  D E  C A I X A  - " + (jETD.isSelected() ? "C R E D I T O" : "D E B I T O"), "F");
+        
         JOptionPane.showInternalMessageDialog(this, "Lançamento Ok!");
         jValor.setText("0,00");
         jbtLancar.setEnabled(false);
         jETD.requestFocus();
     }//GEN-LAST:event_jbtLancarActionPerformed
 
+    public void ImprimePassCaixaPDF(float nAut, String[][] Valores, String texto, String ValorRec, String idAviso, String cutPaper) {
+        float[] columnWidths = {};
+        Collections gVar = VariaveisGlobais.dCliente;
+        jPDF pdf = new jPDF();
+
+        String docID = ".pdf";
+        String pathName = "reports/Recibos/" + Dates.iYear(new Date()) + "/" + Dates.Month(new Date()) + "/";
+        pdf.setPathName(pathName);
+        String docName = "PC_" + Dates.DateFormat("dd-MM-yyy", new Date()) + "_" + FuncoesGlobais.StrZero(String.valueOf((int)nAut), 7) + docID;
+        pdf.setDocName(docName);
+        
+        BaseFont bf = null;
+        try {
+            bf = BaseFont.createFont(BaseFont.HELVETICA, BaseFont.WINANSI, BaseFont.EMBEDDED);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        com.itextpdf.text.Font font = new com.itextpdf.text.Font(bf, 9, java.awt.Font.PLAIN);
+
+        pdf.open();
+        
+        // Logo
+        com.itextpdf.text.Image img;
+        try {
+            Image t_img = new ResizeImageIcon("E", VariaveisGlobais.logo, 80, 30).getImg().getImage();
+            img = com.itextpdf.text.Image.getInstance(t_img, Color.BLACK);
+            img.setAlignment(Element.ALIGN_LEFT);        
+            pdf.doc_add(img);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        Paragraph p;
+        
+        p = pdf.print(gVar.get("empresa"), pdf.HELVETICA, 9, pdf.NORMAL, pdf.LEFT, pdf.BLACK);
+        pdf.doc_add(p);
+        if (!gVar.get("cnpj").trim().equals("") || gVar.get("cnpj") != null) {
+            p = pdf.print(gVar.get("tipodoc"), pdf.HELVETICA, 9, pdf.NORMAL, pdf.LEFT,pdf.BLACK);
+            pdf.doc_add(p);
+        }
+        p = pdf.print(gVar.get("endereco") + ", " + gVar.get("numero") + " " + gVar.get("complemento"), pdf.HELVETICA, 9, pdf.NORMAL, pdf.LEFT, pdf.BLACK);
+        pdf.doc_add(p);
+        p = pdf.print(gVar.get("bairro") + " - " + gVar.get("cidade") + " - " + gVar.get("estado") + " - " + gVar.get("cep"), pdf.HELVETICA, 9, pdf.NORMAL, pdf.LEFT, pdf.BLACK);
+        pdf.doc_add(p);
+        p = pdf.print("Tel/Fax:" + gVar.get("telefone"), pdf.HELVETICA, 9, pdf.NORMAL, pdf.LEFT, pdf.BLACK);
+        pdf.doc_add(p);
+        p = pdf.print("\n", pdf.HELVETICA, 9, pdf.NORMAL, pdf.CENTER, pdf.BLACK);
+        pdf.doc_add(p);
+        p = pdf.print(idAviso, pdf.HELVETICA, 12, pdf.BOLD, pdf.CENTER, pdf.BLUE);
+        pdf.doc_add(p);
+        p = pdf.print("\n", pdf.HELVETICA, 9, pdf.NORMAL, pdf.CENTER, pdf.BLACK);
+        pdf.doc_add(p);
+        
+        columnWidths = new float[] {37, 63 };
+        PdfPTable table = new PdfPTable(columnWidths);
+        table.setHeaderRows(0);
+        table.setWidthPercentage(100);
+        font = new com.itextpdf.text.Font(bf, 9, java.awt.Font.PLAIN);
+        font.setColor(BaseColor.BLACK);
+        
+        PdfPCell cell1 = new PdfPCell(new Phrase("CAIXA: " + VariaveisGlobais.logado,font));
+        cell1.setHorizontalAlignment(Element.ALIGN_LEFT);
+        cell1.setBorder(Rectangle.NO_BORDER);
+        table.addCell(cell1);
+        PdfPCell cell2 = new PdfPCell(new Phrase("Data/Hora: " + Dates.DateFormat("dd/MM/yyyy HH:mm", new Date()),font));
+        cell2.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        cell2.setBorder(Rectangle.NO_BORDER);
+        table.addCell(cell2);
+        table.completeRow();
+        pdf.doc_add(table);
+
+        p = pdf.print("", pdf.HELVETICA, 9, pdf.NORMAL, pdf.CENTER, pdf.BLACK);
+        LineSeparator l = new LineSeparator();
+        l.setPercentage(100f);
+        p.add(new Chunk(l));
+        pdf.doc_add(p);
+
+        columnWidths = new float[] {100};
+        table = new PdfPTable(columnWidths);
+        table.setHeaderRows(0);
+        table.setWidthPercentage(100);
+        // Dados do aviso
+        font.setColor(BaseColor.BLACK);
+        cell1 = new PdfPCell(new Phrase(texto,font));
+        cell1.setHorizontalAlignment(Element.ALIGN_JUSTIFIED);
+        cell1.setBorder(Rectangle.NO_BORDER);
+        cell1.setBackgroundColor(BaseColor.WHITE);
+        table.addCell(cell1);
+        table.completeRow();
+        pdf.doc_add(table);
+        
+        columnWidths = new float[] {70, 30};
+        table = new PdfPTable(columnWidths);
+        table.setHeaderRows(0);
+        table.setWidthPercentage(100);
+        font.setColor(BaseColor.BLACK);
+        cell1 = new PdfPCell(new Phrase("",font));
+        cell1.setHorizontalAlignment(Element.ALIGN_LEFT);
+        cell1.setBorder(Rectangle.NO_BORDER);
+        cell1.setBackgroundColor(BaseColor.WHITE);
+        table.addCell(cell1);
+        cell2 = new PdfPCell(new Phrase("==========", font));
+        cell2.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        cell2.setBorder(Rectangle.NO_BORDER);
+        cell2.setBackgroundColor(BaseColor.WHITE);
+        table.addCell(cell2);
+
+        font.setColor(BaseColor.BLACK);
+        cell1 = new PdfPCell(new Phrase("Total da Passagem de Caixa",font));
+        cell1.setHorizontalAlignment(Element.ALIGN_LEFT);
+        cell1.setBorder(Rectangle.NO_BORDER);
+        cell1.setBackgroundColor(BaseColor.WHITE);
+        table.addCell(cell1);
+        cell2 = new PdfPCell(new Phrase(ValorRec, font));
+        cell2.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        cell2.setBorder(Rectangle.NO_BORDER);
+        cell2.setBackgroundColor(BaseColor.WHITE);
+        table.addCell(cell2);
+        table.completeRow();
+        pdf.doc_add(table);
+
+        p = pdf.print("\n", pdf.HELVETICA, 9, pdf.NORMAL, pdf.CENTER, pdf.BLACK);
+        pdf.doc_add(p);
+
+        font = new com.itextpdf.text.Font(bf, 8, java.awt.Font.PLAIN);
+        if (nAut > 0) {
+            p = pdf.print("__________ VALOR(ES) LANCADOS __________", pdf.HELVETICA, 7, pdf.NORMAL, pdf.CENTER, pdf.BLACK);
+            pdf.doc_add(p);
+
+            for (int i=0;i<Valores.length;i++) {
+                String bLinha = "";
+                if (!"".equals(Valores[i][1].trim())) {
+                    bLinha = "BCO:" + new Pad(Valores[i][1],3).RPad() + " AG:" + new Pad(Valores[i][2],4).RPad() + " CH:" + new Pad(Valores[i][3],8).RPad() + " DT: " + new Pad(Valores[i][0],10).CPad() + " VR:" + new Pad(Valores[i][4],10).LPad();
+                } else bLinha = (Valores[i][5].trim().toUpperCase().equalsIgnoreCase("CT") ? "BC" : Valores[i][5].trim().toUpperCase()) +  ":" + new Pad(Valores[i][4],10).LPad();
+
+                p = pdf.print(bLinha, pdf.HELVETICA, 6, pdf.NORMAL, pdf.RIGHT, pdf.BLACK);
+                pdf.doc_add(p);
+            }
+
+            p = pdf.print("\n", pdf.HELVETICA, 6, pdf.NORMAL, pdf.LEFT, pdf.BLACK);
+            pdf.doc_add(p);
+
+            l = new LineSeparator();
+            l.setPercentage(100f);
+            p = pdf.print("", pdf.HELVETICA, 7, pdf.BOLDITALIC, pdf.LEFT, pdf.BLACK);
+            p.add(new Chunk(l));
+            pdf.doc_add(p);
+
+            // Imprimir Autenticação
+            p = pdf.print(VariaveisGlobais.dCliente.get("marca").trim() + 
+                    "PC" + FuncoesGlobais.StrZero(String.valueOf((int)nAut), 7) + 
+                    "-1" + Dates.DateFormat("ddMMyyyyHHmmss", new Date()) + 
+                    FuncoesGlobais.GravaValores(ValorRec, 2) + 
+                    VariaveisGlobais.logado, pdf.HELVETICA, 7, pdf.NORMAL, pdf.CENTER, pdf.BLACK);
+            pdf.doc_add(p);
+            
+            PdfContentByte cb = pdf.writer().getDirectContent();
+            BarcodeInter25 code25 = new BarcodeInter25();
+            String barra = FuncoesGlobais.StrZero(String.valueOf((int)nAut),16);
+            code25.setCode(barra);
+            code25.setChecksumText(true);
+            code25.setFont(null);
+            com.itextpdf.text.Image cdbar = code25.createImageWithBarcode(cb, null, null);
+            cdbar.setAlignment(Element.ALIGN_CENTER);
+            pdf.doc_add(cdbar);            
+        }
+
+        // Pula linhas (6) / corta papel
+        for (int k=1;k<=6;k++) { 
+            p = pdf.print("\n", pdf.HELVETICA, 6, pdf.NORMAL, pdf.LEFT, pdf.BLACK);
+            pdf.doc_add(p);
+        }
+        
+        pdf.close();
+        //pdf.print();
+        new toPrint(pathName + docName, VariaveisGlobais.PassCaixa.split(",")[0],VariaveisGlobais.PassCaixa.split(",")[1],VariaveisGlobais.PassCaixa.split(",")[2]);
+        pdf.setPathName("");
+        pdf.setDocName("");
+    }
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JRadioButton jETA;
