@@ -12,7 +12,6 @@ import Funcoes.jDirectory;
 import Funcoes.jTableControl;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.nio.ByteBuffer;
@@ -267,7 +266,6 @@ public class Tiss extends javax.swing.JInternalFrame {
         setFrameIcon(new javax.swing.ImageIcon(getClass().getResource("/Figuras/IconesPL/money.png"))); // NOI18N
         setMaximumSize(new java.awt.Dimension(669, 519));
         setMinimumSize(new java.awt.Dimension(669, 519));
-        setOpaque(true);
         setVisible(true);
 
         jLabel3.setBackground(new java.awt.Color(153, 153, 255));
@@ -420,14 +418,15 @@ public class Tiss extends javax.swing.JInternalFrame {
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jChbSelTodosPacientes)
-                    .addComponent(jRbxTiss30200)
-                    .addComponent(jRbxTiss30500)
-                    .addComponent(jBtnGerarXml)
-                    .addComponent(jLabel8)
-                    .addComponent(SelLote, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnSelLote, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(btnSelLote, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jChbSelTodosPacientes)
+                        .addComponent(jRbxTiss30200)
+                        .addComponent(jRbxTiss30500)
+                        .addComponent(jBtnGerarXml)
+                        .addComponent(jLabel8)
+                        .addComponent(SelLote, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -613,7 +612,7 @@ public class Tiss extends javax.swing.JInternalFrame {
             return;
         }
         
-        if (dInic.getMonth() < 03) {
+        if (dInic.getMonth() < 03 && dInic.getYear() < 121) {
             JOptionPane.showMessageDialog(this, "Não pode gerar faturamentos antes de Abril/2021!");
             jdtinic.selectAll();
             jdtinic.requestFocus();
@@ -809,7 +808,7 @@ public class Tiss extends javax.swing.JInternalFrame {
 
                 // para cada guia
                 for (int i = iPacientes; i <= fPacientes; i++) {
-                    int row = jPacientes.convertRowIndexToModel((int)selPacientes.get(i));
+                    int row = (int)selPacientes.get(i);
                     if ((Boolean)jPacientes.getModel().getValueAt(row, 5)) {
                         String mdata = Dates.StringtoString(jPacientes.getModel().getValueAt(row, 0).toString(),"dd-MM-yyyy","yyyy-MM-dd");
                         String mhora = jPacientes.getModel().getValueAt(row, 1).toString();

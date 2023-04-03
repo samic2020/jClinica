@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Relatorio_2018_2019" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="d1593c21-30ab-47db-a550-faacfdf94e25">
 	<property name="ireport.zoom" value="1.0"/>
-	<property name="ireport.x" value="14"/>
+	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
 	<queryString>
-		<![CDATA[select to_char(f.ma_data, 'DD-MM-YYYY') AS Data, f.ma_nome, p.pc_cpf, p.pc_identidade, p.pc_endereco || ', ' || p.pc_endnum || CASE WHEN p.pc_compl = '' THEN '' ELSE ' - ' || p.pc_compl END as Endereco, p.pc_bairro as Bairro, p.pc_cidade as Cidade, p.pc_estado as Estado from faturar as f inner join pacientes as p on f.ma_pcnumero = p.pc_numero where extract(year from f.ma_data) >= 2020 and extract(year from f.ma_data) <= 2020 order by f.ma_data, Upper(pc_nome);]]>
+		<![CDATA[select to_char(f.ma_data, 'DD-MM-YYYY') AS Data, f.ma_nome, p.pc_cpf, p.pc_identidade, p.pc_endereco || ', ' || p.pc_endnum || CASE WHEN p.pc_compl = '' THEN '' ELSE ' - ' || p.pc_compl END as Endereco, p.pc_bairro as Bairro, p.pc_cidade as Cidade, p.pc_estado as Estado from faturar as f inner join pacientes as p on f.ma_pcnumero = p.pc_numero where f.ma_data between '2023-01-01' AND '2023-03-15' order by f.ma_data, Upper(pc_nome);]]>
 	</queryString>
 	<field name="data" class="java.lang.String"/>
 	<field name="ma_nome" class="java.lang.String"/>
@@ -31,7 +31,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="14" isBold="true" isItalic="true"/>
 				</textElement>
-				<text><![CDATA[Período de 2020]]></text>
+				<text><![CDATA[Período de 01/01/2023 a 15/03/2023]]></text>
 			</staticText>
 		</band>
 	</pageHeader>

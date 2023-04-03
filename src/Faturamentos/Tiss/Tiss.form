@@ -23,7 +23,6 @@
     <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
       <Dimension value="[669, 519]"/>
     </Property>
-    <Property name="opaque" type="boolean" value="true"/>
     <Property name="visible" type="boolean" value="true"/>
   </Properties>
   <SyntheticProperties>
@@ -281,14 +280,16 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="3" attributes="0">
-                      <Component id="jChbSelTodosPacientes" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="jRbxTiss30200" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="jRbxTiss30500" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="jBtnGerarXml" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="jLabel8" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="SelLote" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="0" attributes="0">
                       <Component id="btnSelLote" alignment="0" min="-2" pref="33" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="3" attributes="0">
+                          <Component id="jChbSelTodosPacientes" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="jRbxTiss30200" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="jRbxTiss30500" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="jBtnGerarXml" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel8" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="SelLote" alignment="3" min="-2" max="-2" attributes="0"/>
+                      </Group>
                   </Group>
                   <EmptySpace max="32767" attributes="0"/>
               </Group>
